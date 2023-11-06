@@ -1,0 +1,339 @@
+openapi: 3.0.0
+servers:
+  - description: Main Server
+    url: https://sgambe.serv00.net/api
+info:
+  description: This is the unofficial API for War Thunder. It is not affiliated with Gaijin Entertainment.
+  version: "1.0.0"
+  title: War Thunder Unofficial API
+  contact:
+    email: studente.cosimo.sgambelluri@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: everyone
+    description: Endpoints accessible to everyone
+paths:
+  /vehicles:
+    get:
+      tags:
+        - everyone
+      summary: Get all vehicles
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of vehicles to return
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 1000
+            default: 1000
+        - name: country
+          in: query
+          description: Filter by country
+          schema:
+            type: string
+            enum:
+            - usa
+            - germany
+            - ussr
+            - britain
+            - japan
+            - italy
+            - france
+            - sweden
+            - china
+            - isreal
+        - name: type
+          in: query
+          description: Filter by vehicle type
+          schema:
+            type: string
+            enum:
+            - lighttank
+            - mediumtank
+            - heavytank
+            - tankdestroyer
+            - spaa
+            - fighter
+            - stormovik
+            - bomber
+            - divebomber
+            - torpedoboat
+            - submarinechaser
+            - minelayer
+            - transport
+            - navalferrybarge
+            - destroyer
+            - torpedogunboat
+            - ship
+        - name: rank
+          in: query
+          description: Filter by vehicle rank
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 8
+        - name: isPremium
+          in: query
+          description: Filter by premium status
+          schema:
+            type: boolean
+        - name: isGift
+          in: query
+          description: If true, only marketplace vehicles will be returned. If isPremium is ALSO true, vehicles pack will be returned.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Vehicles matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehicleGeneric'
+        '404':
+          description: No vehicles matching criteria found
+  /vehicles/{identifier}:
+    get:
+      tags:
+        - everyone
+      summary: Get one vehicle
+      parameters:
+        - name: identifier
+          in: path
+          description: Vehicle identifier
+          required: true
+          schema:
+            type: string
+            example: yak-7b
+      responses:
+        '200':
+          description: Vehicle matching identifier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleSpecific'
+        '404':
+          description: No vehicle matching identifier
+  /stats:
+    get:
+      tags:
+        - everyone
+      summary: Get miscellaneus statistics
+      responses:
+        '200':
+          description: statistics have been successfully calculated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+components:
+  schemas:
+    VehicleGeneric:
+      type: object
+      properties:
+        country:
+          type: string
+          example: ussr
+        identifier:
+          type: string
+          example: yak-7b
+        tier:
+          type: number
+          example: 2
+        type:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example: fighter
+        releaseDate:
+          type: string
+          example: "2019-01-01 00:00:00"
+        value:
+          type: number
+          example: 38000
+        reqExp:
+          type: number
+          example: 11000
+        isPremium:
+          type: boolean
+          example: false
+        costGold:
+          type: number
+          example: 0
+        isGift:
+          type: boolean
+          example: false
+        crewTotalCount:
+          type: number
+          example: 1
+        train1Cost:
+          type: number
+          example: 11000
+        train2Cost:
+          type: number
+          example: 38000
+        train3Cost_gold:
+          type: number
+          example: 250
+        train3Cost_exp:
+          type: number
+          example: 220000
+        repairTimeHrsArcade:
+          type: number
+          example: 1.56
+        repairTimeHrsHistorical:
+          type: number
+          example: 4.2
+        repairTimeHrsSimulaton:
+          type: number
+          example: 7.75
+        repairCostArcadeBasic:
+          type: number
+          example: 600
+        repairCostHistoricalBasic:
+          type: number
+          example: 1300
+        repairCostSimulationBasic:
+          type: number
+          example: 1805
+        repairCostArcadeReference:
+          type: number
+          example: 827
+        repairCostHistoricalReference:
+          type: number
+          example: 1630
+        repairCostSimulationReference:
+          type: number
+          example: 2263
+        mass:
+          type: number
+          example: 2982
+        engine:
+          type: object
+        aerodyanmics:
+          type: object
+        weapons:
+          type: object
+        presets:
+          type: object
+        arcadeBr:
+          type: number
+          example: 3.3
+        realisticBr:
+          type: number
+          example: 2.7
+        simulationBr:
+          type: number
+          example: 2.7
+    VehicleSpecific:
+        type: object
+        properties:
+          country:
+            type: string
+            example: ussr
+          identifier:
+            type: string
+            example: yak-7b
+          tier:
+            type: number
+            example: 2
+          type:
+            oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+            example: fighter
+          releaseDate:
+            type: string
+            example: "2019-01-01 00:00:00"
+          value:
+            type: number
+            example: 38000
+          reqExp:
+            type: number
+            example: 11000
+          isPremium:
+            type: boolean
+            example: false
+          costGold:
+            type: number
+            example: 0
+          isGift:
+            type: boolean
+            example: false
+          crewTotalCount:
+            type: number
+            example: 1
+          train1Cost:
+            type: number
+            example: 11000
+          train2Cost:
+            type: number
+            example: 38000
+          train3Cost_gold:
+            type: number
+            example: 250
+          train3Cost_exp:
+            type: number
+            example: 220000
+          repairTimeHrsArcade:
+            type: number
+            example: 1.56
+          repairTimeHrsHistorical:
+            type: number
+            example: 4.2
+          repairTimeHrsSimulaton:
+            type: number
+            example: 7.75
+          repairCostArcadeBasic:
+            type: number
+            example: 600
+          repairCostHistoricalBasic:
+            type: number
+            example: 1300
+          repairCostSimulationBasic:
+            type: number
+            example: 1805
+          repairCostArcadeReference:
+            type: number
+            example: 827
+          repairCostHistoricalReference:
+            type: number
+            example: 1630
+          repairCostSimulationReference:
+            type: number
+            example: 2263
+          mass:
+            type: number
+            example: 2982
+          engine:
+            type: object
+          aerodyanmics:
+            type: object
+          weapons:
+            type: object
+          presets:
+            type: object
+          arcadeBr:
+            type: number
+            example: 3.3
+          realisticBr:
+            type: number
+            example: 2.7
+          simulationBr:
+            type: number
+            example: 2.7
+          images:
+            type: array
+            items:
+              type: string
+              example: https://sgambe.serv00.net/aircrafts/yak-7b.png
+    Statistics:
+      type: object          

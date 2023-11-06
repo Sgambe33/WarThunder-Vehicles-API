@@ -1,0 +1,101 @@
+require('dotenv').config();
+const fs = require('fs');
+const express = require('express');
+const router = express.Router();
+const Vehicle = require('../models/vehicle');
+const https = require('follow-redirects').https;
+
+
+router.get('/vehicles/:id', async (req, res) => {
+	try {
+		console.log(req.params.id);
+
+		let data = await Vehicle.find({ identifier: req.params.id }, { _id: 0 });
+		console.log(data);
+		if (data.length === 0) {
+			res.status(404).json({ message: "No vehicles found" })
+		} else {
+			const images = lookForImages(data[0].identifier, data[0].type);
+			data[0] = data[0].toObject();
+			data[0].images = [];
+			for (let i = 0; i < images.length; i++) {
+				data[0].images.push(`${req.protocol}://${req.get('Host')}/${images[i]}`)
+			}
+			res.status(200).json(data[0])
+		}
+	} catch (error) {
+		res.status(500).json({ message: error.message })
+	}
+})
+
+router.get('/vehicles/search/:name', async (req, res) => {
+	try {
+		let name = req.params.name;
+		name = name.replace('-', '_');
+		console.log(name);
+		let data = await Vehicle.find({ identifier: { $regex: name, $options: 'i' } }, { _id: 0 });
+		if (data.length === 0) {
+			res.status(404).json({ message: "No vehicles found" })
+		} else {
+			res.status(200).json(data)
+		}
+	} catch (error) {
+		res.status(500).json({ message: error.message })
+	}
+});
+
+router.get('/stats', async (req, res) => {
+	try {
+		let countAndCosts = await Vehicle.aggregate([
+			{
+				$match: {
+					$and: [
+						{
+							isPremium: false
+						}, {
+							isGift: false
+						}, {
+							identifier: {
+								$not: /killstreak/
+							}
+						}
+					]
+				}
+			},
+			{
+				$group: {
+					_id: "$country",
+					totalRP: {
+						$sum: "$reqExp"
+					},
+					totalSL: {
+						$sum: "$value"
+					}
+				}
+			},
+			{
+				$lookup: {
+					from: "Vehicles", // Sostituisci con il nome corretto della tua raccolta di veicoli
+					localField: "_id",
+					foreignField: "country",
+					as: "vehicleStats"
+				}
+			},
+			{
+				$project: {
+					_id: 0,
+					country: "$_id",
+					totalRP: 1,
+					totalSL: 1,
+					totalVehicles: { $size: "$vehicleStats" }
+				}
+			}
+		]);
+		res.status(200).json(countAndCosts)
+	} catch (error) {
+		res.status(500).json({ message: error.message })
+	}
+})
+
+
+module.exports = router;

@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL_PROD")
+}
+
+model vehicles {
+  id                            String  @id @default(auto()) @map("_id") @db.ObjectId
+  activeProtectionSystem        Json?
+  aerodynamics                  Json
+  arcadeBr                      Float
+  costGold                      Int
+  country                       String
+  crewTotalCount                Int
+  engine                        Json
+  historicalBr                  Float
+  identifier                    String
+  isGift                        Boolean
+  isPremium                     Boolean
+  mass                          Float
+  presets                       Json?
+  releaseDate                   String
+  repairCostArcadeBasic         Int
+  repairCostArcadeReference     Int
+  repairCostHistoricalBasic     Int
+  repairCostHistoricalReference Int
+  repairCostSimulationBasic     Int
+  repairCostSimulationReference Int
+  repairTimeHrsArcade           Float
+  repairTimeHrsHistorical       Float
+  repairTimeHrsSimulation       Float
+  reqExp                        Int
+  sensors                       Json?
+  simulationBr                  Float
+  tier                          Int
+  train1Cost                    Int
+  train2Cost                    Int
+  train3Cost_exp                Int
+  train3Cost_gold               Int
+  type                          Json
+  value                         Int
+  weapons                       Json?
+}

@@ -1,0 +1,20 @@
+{
+  "name": "wtvehiclesapi",
+  "version": "2.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "Sgambe33",
+  "license": "",
+  "dependencies": {
+    "@prisma/client": "^4.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "follow-redirects": "^1.15.3",
+    "nodemon": "^3.0.1",
+    "prisma": "^5.5.2"
+  }
+}
