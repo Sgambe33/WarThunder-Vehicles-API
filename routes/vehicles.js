@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { PrismaClient } = require('@prisma/client')
+const { Vehicle } = require('../models/models');
 
 module.exports = {
     base_route: `/vehicles`,
@@ -23,23 +23,17 @@ module.exports = {
                 const query = {};
 
                 if (country) query.country = country;
-                if (type) query.type = type;    
+                if (type) query.type = type;
                 if (rank) query.tier = rank;
                 if (isPremium) query.isPremium = isPremium;
                 if (isGift) query.isGift = isGift;
                 console.log("Query: ", query);
 
-                const prisma = new PrismaClient()
-                let result = await prisma.vehicles.findMany(
-                    {
-                        where: query,
-                        take: user_limit
-                    }
-                );
-                if (result.length === 0) {
+                const data = await Vehicle.find(query, { _id: 0 }, { limit: user_limit });
+                if (data.length === 0) {
                     res.status(404).json({ message: "No vehicles found" })
                 } else {
-                    res.status(200).json(result)
+                    res.status(200).json(data)
                 }
             }
             catch (error) {

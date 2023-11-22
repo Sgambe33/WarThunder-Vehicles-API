@@ -3,6 +3,18 @@ const cors = require('cors');
 const fs = require(`fs`);
 const path = require('path');
 const express = require('express');
+const mongoose = require('mongoose');
+
+mongoose.connect(process.env.DATABASE_URL_PROD);
+const database = mongoose.connection;
+
+database.on('error', (error) => {
+    console.log(error)
+})
+
+database.once('connected', () => {
+    console.log('Database Connected');
+})
 
 const app = express();
 app.use(cors())

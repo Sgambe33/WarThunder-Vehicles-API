@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
-const { PrismaClient } = require('@prisma/client')
-const {exclude} = require('../utils/utilFunctions.js');
+const { Vehicle } = require('../models/models');
+const { exclude } = require('../utils/utilFunctions.js');
 
 module.exports = {
     base_route: `/vehicles`,
@@ -10,19 +10,11 @@ module.exports = {
 
         route.get(`/:id`, async (req, res) => {
             try {
-                console.log(req.params.id);
-        
-                const prisma = new PrismaClient()
-                let result = await prisma.vehicles.findMany(
-                    {
-                        where: {identifier: req.params.id},
-                    }
-            
-                );
-                if (result.length === 0) {
-                    res.status(404).json({ message: "No vehicle with such id." });
+                let data = await Vehicle.find({ identifier: req.params.id }, { _id: 0 });
+                if (data.length === 0) {
+                    res.status(404).json({ message: "No vehicles found" })
                 } else {
-                    res.status(200).json(exclude(result[0], '_id'));
+                    res.status(200).json(data[0])
                 }
             } catch (error) {
                 res.status(500).json({ message: error.message })
