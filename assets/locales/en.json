@@ -1,0 +1,17 @@
+{
+    "vehicles": {
+        "cn_bt_5" : "BT-5",
+        "cn_m3a3_stuart":"␗M3A3 Stuart",
+        "cn_is_2_1944":"␗IS-2 (1944)",
+        "arado-196a-5":"▄Ar 196 A-5",
+        "bf_110g_4_hungary":"◐Bf 110",
+        "il_28_killstreak":"☢IL-28",
+        "ju-87d-3_italy_shop":"▄Ju 87 D-3"
+    },
+    "weapons":{
+        "88mm_Flak41_user_cannon":"88 mm Flak 41 cannon",
+        "128mm_KwK44_user_cannon":"128 mm KwK44 cannon",
+        "76mm_F32_user_cannon":"76 mm F-32 cannon",
+        "12_7mm_M3P_user_machinegun":"12.7 mm M3P machine gun"
+    }
+}
