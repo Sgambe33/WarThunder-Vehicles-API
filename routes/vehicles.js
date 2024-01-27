@@ -29,10 +29,16 @@ module.exports = {
                 if (isGift) query.isGift = isGift;
                 console.log("Query: ", query);
 
-                const data = await Vehicle.find(query, { _id: 0 }, { limit: user_limit });
+                let data = await Vehicle.find(query, { _id: 0 }, { limit: user_limit }).lean();
                 if (data.length === 0) {
                     res.status(404).json({ message: "No vehicles found" })
                 } else {
+                    data.forEach((vehicle) => {
+                        vehicle.images = []
+                        vehicle.images.push(`${req.get('host')}/assets/images/${vehicle.identifier}.png`)
+                        vehicle.images.push(`${req.get('host')}/assets/techtrees/${vehicle.identifier}.png`)
+                        //response.push(vehicle)
+                    })
                     res.status(200).json(data)
                 }
             }
