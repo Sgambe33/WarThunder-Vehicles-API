@@ -30,7 +30,9 @@ const vehicleSchema = new mongoose.Schema({
     aerodyanmics: Object,
     weapons: Object,
     presets: Object,
+    sensors: Object
 },{
+    minimize: false,
     collection: 'vehicles'
 });
 
