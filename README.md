@@ -1,6 +1,6 @@
 # WAR THUNDER API
 
->⚠ *Attention: the api is being reworked and rewritten to improve data coverage and performance. There is no ETA. (I'm about 75% done)* ⚠
+>⚠ *Attention: the api is being reworked and rewritten to improve data coverage and performance. There is no ETA. (I'm about 85% done)* ⚠
 
 This API allows to fetch data about all the in-game vehicles, even those hidden or event related. From vehicle performance to their economic cost, from their guns to their weapon presets. Since it's still a work in progress there may be errors in the data but more information will be added as development goes on.
 
