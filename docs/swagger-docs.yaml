@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
   - description: Main Server
-    url: http://wtvehiclesapi.serv00.net/api
+    url: http://wtvehiclesapi.sgambe.serv00.net/api
 info:
-  description: This is the unofficial API for War Thunder. It is not affiliated with Gaijin Entertainment.
+  description: This is the unofficial API for War Thunder Vehicles. It is not affiliated with Gaijin Entertainment.
   version: "1.0.0"
   title: War Thunder Unofficial API
   contact:
