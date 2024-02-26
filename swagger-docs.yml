@@ -1,7 +1,7 @@
 openapi: 3.0.0
 servers:
   - description: Main Server
-    url: https://sgambe.serv00.net/api
+    url: http://wtvehiclesapi.serv00.net/api
 info:
   description: This is the unofficial API for War Thunder. It is not affiliated with Gaijin Entertainment.
   version: "1.0.0"
@@ -91,9 +91,11 @@ paths:
           content:
             application/json:
               schema:
+                maxLength: 1000
                 type: array
                 items:
                   $ref: '#/components/schemas/VehicleGeneric'
+                maxItems: 1000
         '404':
           description: No vehicles matching criteria found
   /vehicles/{identifier}:
@@ -129,7 +131,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Statistics'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Statistics'
+  /vehicles/search/{name}:
+    get:
+      tags:
+        - everyone
+      summary: Search IDs by common name
+      parameters:
+        - name: name
+          in: path
+          description: Vehicle name
+          required: true
+          schema:
+            type: string
+            example: t-34
+      responses:
+        '200':
+          description: Vehicles IDs matching name
+          content:
+            application/json:
+              schema:
+                maxLength: 1000
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehiclesIDs'
+                maxItems: 1000
+        '404':
+          description: No vehicles matching name found
 components:
   schemas:
     VehicleGeneric:
@@ -336,4 +366,20 @@ components:
               type: string
               example: https://sgambe.serv00.net/aircrafts/yak-7b.png
     Statistics:
-      type: object          
+      type: object
+      properties:
+        totalRP: 
+          type: number
+          example: 1000000
+        totalSL:
+          type: number
+          example: 1000000
+        totalVehicles:
+          type: number
+          example: 1000
+        country:
+          type: string
+          example: ussr
+    VehiclesIDs:
+      type: string
+      example: "ussr_t_34_85_zis_53"
