@@ -1,31 +1,29 @@
 require('dotenv').config();
 const express = require('express');
-const { Vehicle } = require('../models/models');
-const { exclude } = require('../utils/utilFunctions.js');
+const {Vehicle} = require('../models/models');
 
 module.exports = {
-    base_route: `/vehicles`,
+    base_route: '/vehicles',
     handler: () => {
-        const route = express.Router({ caseSensitive: false });
+        const route = express.Router({caseSensitive: false});
 
-        route.get(`/:id`, async (req, res) => {
+        route.get('/:id', async (req, res) => {
             try {
-                let data = await Vehicle.find({ identifier: req.params.id }, { _id: 0 }).lean();
-                if (data.length === 0) {
-                    res.status(404).json({ message: "No vehicles found" })
+                const queryResult = await Vehicle.findOne({where: {identifier: req.params.id}});
+                if (queryResult) {
+                    queryResult.dataValues.images = {
+                        image: `${req.get('host')}/assets/images/${queryResult.dataValues.identifier}.png`,
+                        techtree: `${req.get('host')}/assets/techtrees/${queryResult.dataValues.identifier}.png`
+                    };
+                    res.status(200).json(queryResult);
                 } else {
-                    data[0].images = []
-                    data[0].images.push(`http://${req.get('host')}/assets/images/${data[0].identifier}.png`)
-                    data[0].images.push(`http://${req.get('host')}/assets/techtrees/${data[0].identifier}.png`)
-                    res.status(200).json(data[0])
+                    res.status(404).json({error: 'Vehicle not found'});
                 }
-            } catch (error) {
-                res.status(500).json({ message: error.message })
+            } catch (err) {
+                res.status(500).json({error: err.message});
             }
-        })
+        });
 
         return route;
     }
-
-}
-
+};
