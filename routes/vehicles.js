@@ -10,16 +10,17 @@ module.exports = {
         route.get('', async (req, res) => {
                 try {
                     const user_limit = Math.min(parseInt(req.query.limit) || 50, 200);
-                    const {country, type, rank, isPremium, isGift} = req.query;
+                    const {country, type, era, isPremium, isGift} = req.query;
                     const filter = {};
                     if (country) filter.country = country;
                     if (type) filter.vehicle_type = type;
-                    if (rank) filter.rank = rank;
+                    if (rank) filter.era = era;
                     if (isPremium) filter.is_premium = isPremium;
                     if (isGift) filter.is_gift = isGift;
                     const vehicles = await Vehicle.findAll({
                         where: filter,
-                        limit: user_limit
+                        limit: user_limit,
+                        attributes: ['identifier', 'country', 'vehicle_type', 'era', 'arcade_br', 'realistic_br', 'simulator_br', 'event', 'release_date', 'is_premium', 'is_gift', 'value', 'req_exp', 'ge_cost']
                     });
                     vehicles.forEach((v) => {
                         v.dataValues.images = {
