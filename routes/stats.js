@@ -1,8 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const db = require('../utils/db')
-const {QueryTypes, Sequelize, Op} = require('sequelize');
-const sequelize = require('../app.js');
+const {Sequelize, Op} = require('sequelize');
 const {Vehicle} = require("../models/models");
 
 module.exports = {
