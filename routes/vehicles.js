@@ -24,8 +24,8 @@ module.exports = {
                     });
                     vehicles.forEach((v) => {
                         v.dataValues.images = {
-                            image: `${req.get('host')}/assets/images/${v.dataValues.identifier}.png`,
-                            techtree: `${req.get('host')}/assets/techtrees/${v.dataValues.identifier}.png`
+                            image: `${req.get('host')}/assets/images/${v.dataValues.identifier.toLowerCase()}.png`,
+                            techtree: `${req.get('host')}/assets/techtrees/${v.dataValues.identifier.toLowerCase()}.png`
                         };
                     });
                     res.status(200).json(vehicles);
@@ -34,10 +34,8 @@ module.exports = {
                     res.status(500).json({error: err.message});
                 }
             }
-        )
-        ;
+        );
         return route;
     }
-}
-;
+};
 

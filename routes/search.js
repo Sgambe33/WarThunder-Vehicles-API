@@ -13,7 +13,7 @@ module.exports = {
                 const queryResult = await Vehicle.findAll({
                     where: {
                         identifier: {
-                            [Op.like]: `%${name}%`,
+                            [Op.iLike]: `%${name}%`,
                         },
                     },
                 });
@@ -26,7 +26,6 @@ module.exports = {
                 res.status(500).json({ message: error.message });
             }
         });
-
         return route;
     }
 };

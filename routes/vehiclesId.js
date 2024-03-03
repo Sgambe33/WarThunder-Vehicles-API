@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const {Vehicle} = require('../models/models');
+const {Op} = require("sequelize");
 
 module.exports = {
     base_route: '/vehicles',
@@ -9,11 +10,11 @@ module.exports = {
 
         route.get('/:id', async (req, res) => {
             try {
-                const queryResult = await Vehicle.findOne({where: {identifier: req.params.id}});
+                const queryResult = await Vehicle.findOne({where: {identifier: {[Op.iLike]: req.query.id}}});
                 if (queryResult) {
                     queryResult.dataValues.images = {
-                        image: `${req.get('host')}/assets/images/${queryResult.dataValues.identifier}.png`,
-                        techtree: `${req.get('host')}/assets/techtrees/${queryResult.dataValues.identifier}.png`
+                        image: `${req.get('host')}/assets/images/${queryResult.dataValues.identifier.toLowerCase()}.png`,
+                        techtree: `${req.get('host')}/assets/techtrees/${queryResult.dataValues.identifier.toLowerCase()}.png`
                     };
                     res.status(200).json(queryResult);
                 } else {
@@ -23,7 +24,6 @@ module.exports = {
                 res.status(500).json({error: err.message});
             }
         });
-
         return route;
     }
 };
