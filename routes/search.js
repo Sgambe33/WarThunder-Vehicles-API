@@ -13,7 +13,7 @@ module.exports = {
                 const queryResult = await Vehicle.findAll({
                     where: {
                         identifier: {
-                            [Op.iLike]: `%${name}%`,
+                            [Op.like]: `%${name}%`,
                         },
                     },
                 });

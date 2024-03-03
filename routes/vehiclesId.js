@@ -10,7 +10,7 @@ module.exports = {
 
         route.get('/:id', async (req, res) => {
             try {
-                const queryResult = await Vehicle.findOne({where: {identifier: {[Op.iLike]: req.query.id}}});
+                const queryResult = await Vehicle.findOne({where: {identifier: {[Op.like]: req.params.id}}});
                 if (queryResult) {
                     queryResult.dataValues.images = {
                         image: `${req.get('host')}/assets/images/${queryResult.dataValues.identifier.toLowerCase()}.png`,
