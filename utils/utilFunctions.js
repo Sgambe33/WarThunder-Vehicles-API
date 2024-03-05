@@ -1,11 +1,5 @@
 const {Vehicle} = require('../models/models');
 
-function exclude(obj, keys) {
-    return Object.fromEntries(
-        Object.entries(obj).filter(([key]) => !keys.includes(key))
-    );
-};
-
 async function latestVersion(){
     const randomVehicle = await Vehicle.findOne();
     return randomVehicle.dataValues.version;
@@ -21,7 +15,6 @@ function appendImages(queryResult, req){
 }
 
 module.exports = {
-    exclude,
     latestVersion,
     appendImages
 }
