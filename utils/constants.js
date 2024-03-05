@@ -1,4 +1,3 @@
-const {Vehicle} = require("../models/models");
 const UNIT_TYPES = {
     'tanks': ['lighttank', 'mediumtank', 'heavytank', 'tankdestroyer', 'spaa'],
     'aircrafts': ['fighter', 'stormovik', 'bomber', 'divebomber'],
