@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const {Vehicle} = require('../models/models');
+const {appendImages} = require("../utils/utilFunctions");
 
 module.exports = {
     base_route: '/vehicles',
@@ -23,10 +24,7 @@ module.exports = {
                         attributes: ['identifier', 'country', 'vehicle_type', 'era', 'arcade_br', 'realistic_br', 'simulator_br', 'event', 'release_date', 'is_premium', 'is_gift', 'value', 'req_exp', 'ge_cost']
                     });
                     vehicles.forEach((v) => {
-                        v.dataValues.images = {
-                            image: `${req.get('host')}/assets/images/${v.dataValues.identifier.toLowerCase()}.png`,
-                            techtree: `${req.get('host')}/assets/techtrees/${v.dataValues.identifier.toLowerCase()}.png`
-                        };
+                        appendImages(v, req);
                     });
                     res.status(200).json(vehicles);
                 } catch
