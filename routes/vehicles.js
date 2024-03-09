@@ -11,6 +11,7 @@ module.exports = {
         route.get('', async (req, res) => {
                 try {
                     const user_limit = Math.min(parseInt(req.query.limit) || 50, 200);
+                    const page = parseInt(req.query.page) || 0;
                     const {country, type, era, isPremium, isGift} = req.query;
                     const filter = {};
                     if (country) filter.country = country;
@@ -21,7 +22,9 @@ module.exports = {
                     const vehicles = await Vehicle.findAll({
                         where: filter,
                         limit: user_limit,
-                        attributes: ['identifier', 'country', 'vehicle_type', 'era', 'arcade_br', 'realistic_br', 'simulator_br', 'event', 'release_date', 'is_premium', 'is_gift', 'value', 'req_exp', 'ge_cost']
+                        attributes: ['identifier', 'country', 'vehicle_type', 'era', 'arcade_br', 'realistic_br', 'simulator_br', 'event', 'release_date', 'is_premium', 'is_gift', 'value', 'req_exp', 'ge_cost'],
+                        order: [['identifier', 'ASC']],
+                        offset: page * user_limit
                     });
                     vehicles.forEach((v) => {
                         appendImages(v, req);

@@ -29,6 +29,13 @@ paths:
             minimum: 0
             maximum: 200
             default: 50
+        - name: page
+          in: query
+          description: Pagination control. Takes count of current vehicle limit
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
         - name: country
           in: query
           description: Filter by country
