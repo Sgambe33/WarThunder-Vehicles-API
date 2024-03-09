@@ -4,6 +4,9 @@ const UNIT_TYPES = {
     'ships': ['torpedoboat', 'submarinechaser', 'minelayer', 'transport', 'navalferrybarge', 'destroyer', 'torpedogunboat', 'ship']
 }
 
+const VERSION_REGEX = /^\d+\.\d+\.\d+\.\d+$/;
+
 module.exports = {
-    UNIT_TYPES
+    UNIT_TYPES,
+    VERSION_REGEX
 }

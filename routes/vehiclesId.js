@@ -1,7 +1,8 @@
 require('dotenv').config();
 const express = require('express');
-const {Vehicle} = require('../models/models');
+const {Vehicle, VehicleOld} = require('../models/models');
 const {Op} = require("sequelize");
+const {appendImages} = require("../utils/utilFunctions");
 
 module.exports = {
     base_route: '/vehicles',
@@ -10,16 +11,20 @@ module.exports = {
 
         route.get('/:id', async (req, res) => {
             try {
-                const queryResult = await Vehicle.findOne({where: {identifier: {[Op.like]: req.params.id}}});
-                if (queryResult) {
-                    queryResult.dataValues.images = {
-                        image: `${req.get('host')}/assets/images/${queryResult.dataValues.identifier.toLowerCase()}.png`,
-                        techtree: `${req.get('host')}/assets/techtrees/${queryResult.dataValues.identifier.toLowerCase()}.png`
-                    };
-                    res.status(200).json(queryResult);
-                } else {
-                    res.status(404).json({error: 'Vehicle not found'});
+                let queryResult = await Vehicle.findOne({where: {identifier: {[Op.like]: req.params.id}}});
+                const versions = await VehicleOld.findAll({
+                    attributes: ['version'],
+                    where: {
+                        identifier: {[Op.like]: req.params.id}
+                    }
+                });
+                if (queryResult && versions.length > 0) {
+                    queryResult.dataValues.versions = versions.map(v => v.dataValues.version);
+                    queryResult.dataValues.versions.push(queryResult.dataValues.version);
+                    queryResult = appendImages(queryResult, req);
                 }
+                res.status((queryResult && (versions.length > 0)) ? 200 : 404).json(queryResult || {error: 'Vehicle not found'});
+
             } catch (err) {
                 res.status(500).json({error: err.message});
             }
