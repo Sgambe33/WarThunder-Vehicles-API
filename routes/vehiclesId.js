@@ -18,13 +18,12 @@ module.exports = {
                         identifier: {[Op.like]: req.params.id}
                     }
                 });
-                if (queryResult && versions.length > 0) {
+                if (queryResult) {
                     queryResult.dataValues.versions = versions.map(v => v.dataValues.version);
                     queryResult.dataValues.versions.push(queryResult.dataValues.version);
                     queryResult = appendImages(queryResult, req);
                 }
-                res.status((queryResult && (versions.length > 0)) ? 200 : 404).json(queryResult || {error: 'Vehicle not found'});
-
+                res.status((queryResult) ? 200 : 404).json(queryResult || {error: 'Vehicle not found'});
             } catch (err) {
                 res.status(500).json({error: err.message});
             }
