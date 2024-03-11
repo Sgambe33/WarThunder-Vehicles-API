@@ -1,23 +1,30 @@
-# WAR THUNDER API
+# War Thunder Vehicles API
 
-This API allows to fetch data about all the in-game vehicles, even those hidden or event related. From vehicle performance to their economic cost, from their guns to their weapon presets. Since it's still a work in progress there may be errors in the data but more information will be added as development goes on.
+## Overview
+The War Thunder Vehicles API provides comprehensive data retrieval for all in-game vehicles, including hidden and event-specific vehicles. Access detailed information on vehicle performance, economic costs, armaments, and weapon presets. As the API is under active development, please note that some data may be subject to updates and corrections.
 
-The documentation can be found [here](http://wtvehiclesapi.sgambe.serv00.net/docs).
-There is no call limit but please do not overload the server with requests as the RAM is limited.
+Explore the full documentation [here](http://wtvehiclesapi.sgambe.serv00.net/docs).
+While there is no strict call limit, we kindly ask you to consider our server's limited RAM capacity and avoid excessive requests.
 
 ## Changelog
+### Upcoming in 3.0.0
+- Introduction of versioning for vehicle data retrieval.
+- Inclusion of localization files.
+- Addition of modification icons.
+- Integration of thermal and night vision data.
 
-- 2.0.0: Completely reworked the API to be faster and avoid DB connection issues. More data has been added to each vehicle such as modifications, required vehicle in tech tree, custom presets etc...
-- 1.0.0: Initial release
+### Version 2.0.0
+- Major API overhaul for enhanced speed and reliability.
+- Expanded vehicle data, including modifications, tech tree prerequisites, and custom presets.
 
+### Version 1.0.0
+- Initial API release.
 
 ## Roadmap
+Stay informed about the project's progress and future plans by visiting our [roadmap](https://github.com/users/Sgambe33/projects/4/views/1). We welcome user contributions; please feel free to submit issues for additional data requests.
 
-Project's roadmap can be consulted [here](https://github.com/users/Sgambe33/projects/4/views/1). Users are welcomed to create issues to ask for more specific data.
-
-## Contribute
-
-Whoever wants to contribute should have a bit of experience with Python, JSON parsing, SQLite and also know (briefly) how in-game mechanics work. Pls open issue to request collaboration.  
+## Contributing
+Contributors with experience in Python, JSON parsing, SQLite, and a general understanding of War Thunder's in-game mechanics are highly valued. If you're interested in collaborating, please open an issue to discuss potential contributions.
 
 ## Disclaimer
-This project is not in any way affiliated with Gaijin Entertainment. 
+This API is an independent project and is not affiliated with Gaijin Entertainment in any capacity.
