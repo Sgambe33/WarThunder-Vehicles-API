@@ -24,6 +24,7 @@ While there is no strict call limit, we kindly ask you to consider our server's 
 Stay informed about the project's progress and future plans by visiting our [roadmap](https://github.com/users/Sgambe33/projects/4/views/1). We welcome user contributions; please feel free to submit issues for additional data requests.
 
 ## Contributing
+*Currently looking for helpers, if interested open issue*
 Contributors with experience in Python, JSON parsing, SQLite, and a general understanding of War Thunder's in-game mechanics are highly valued. If you're interested in collaborating, please open an issue to discuss potential contributions.
 
 ## Disclaimer
