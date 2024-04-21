@@ -20,6 +20,10 @@ While there is no strict call limit, we kindly ask you to consider our server's 
 ### Version 1.0.0
 - Initial API release.
 
+## Projects using this API
+- [Snail Stats](https://snail-stats.vercel.app/) by [@Hakzar](https://github.com/Hakzar)
+
+
 ## Roadmap
 Stay informed about the project's progress and future plans by visiting our [roadmap](https://github.com/users/Sgambe33/projects/4/views/1). We welcome user contributions; please feel free to submit issues for additional data requests.
 
