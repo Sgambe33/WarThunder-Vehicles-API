@@ -1,7 +1,7 @@
 openapi: 3.0.0
 servers:
   - description: Main Server
-    url: http://wtvehiclesapi.sgambe.serv00.net/api
+    url: https://www.wtvehiclesapi.sgambe.serv00.net/api
 info:
   description: This is the unofficial API for War Thunder Vehicles. It is not affiliated with Gaijin Entertainment.
   version: "2.0.0"
@@ -75,6 +75,7 @@ paths:
               - destroyer
               - torpedogunboat
               - ship
+              - gunboat
         - name: era
           in: query
           description: Filter by vehicle era
