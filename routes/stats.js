@@ -1,21 +1,24 @@
 require('dotenv').config();
 const express = require('express');
-const {Sequelize, Op} = require('sequelize');
-const {Vehicle} = require("../models/models");
+const { Sequelize, Op } = require('sequelize');
+const { Vehicle } = require("../models/models");
+
+const { fn, col } = Sequelize;
 
 module.exports = {
     base_route: '/vehicles/stats',
     handler: () => {
-        const route = express.Router({caseSensitive: false});
+        const route = express.Router({ caseSensitive: false });
         route.get('', async (req, res) => {
             try {
+                const attributes = [
+                    'country',
+                    [fn('SUM', col('value')), 'total_value'],
+                    [fn('SUM', col('req_exp')), 'total_req_exp'],
+                    [fn('COUNT', col('identifier')), 'total_vehicles']
+                ];
                 const queryResult = await Vehicle.findAll({
-                    attributes: [
-                        'country',
-                        [Sequelize.fn('SUM', Sequelize.col('value')), 'total_value'],
-                        [Sequelize.fn('SUM', Sequelize.col('req_exp')), 'total_req_exp'],
-                        [Sequelize.fn('COUNT', Sequelize.col('identifier')), 'total_vehicles']
-                    ],
+                    attributes,
                     where: {
                         identifier: {
                             [Op.notLike]: "%killstreak%",
@@ -24,10 +27,10 @@ module.exports = {
                         is_premium: false
                     },
                     group: ['country']
-                })
+                });
                 res.status(200).json(queryResult);
             } catch (error) {
-                res.status(500).json({message: error.message});
+                res.status(500).json({ message: error.message });
             }
         });
         return route;

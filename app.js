@@ -20,11 +20,7 @@ app.use('/assets', express.static('assets'));
 
 app.use('*', (req, res) => {
     res.json({
-        at: new Date().toISOString(),
-        method: req.method,
-        hostname: req.hostname,
-        query: req.query,
-        params: req.params
+        at: new Date().toISOString(), method: req.method, hostname: req.hostname, query: req.query, params: req.params
     });
 });
 
