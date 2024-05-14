@@ -58,24 +58,23 @@ paths:
           schema:
             type: string
             enum:
-              - lighttank
-              - mediumtank
-              - heavytank
-              - tankdestroyer
+              - light_tank
+              - medium_tank
+              - heavy_tank
+              - tank_destroyer
               - spaa
               - fighter
-              - stormovik
+              - assault
               - bomber
-              - divebomber
-              - torpedoboat
-              - submarinechaser
-              - minelayer
-              - transport
-              - navalferrybarge
+              - helicopter
+              - torpedo_boat
+              - submarine_chaser
+              - cruiser
+              - naval_ferry_barge
               - destroyer
-              - torpedogunboat
-              - ship
-              - gunboat
+              - torepedo_gun_boat
+              - battleship
+              - gun_boat
         - name: era
           in: query
           description: Filter by vehicle era
@@ -99,6 +98,12 @@ paths:
             enum:
               - 0
               - 1
+        - name: killstreak
+          in: query
+          description: If true, killstreak vehicles (atomic bombers etc) will also be returned.
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Vehicles matching criteria
@@ -134,20 +139,6 @@ paths:
                 $ref: '#/components/schemas/VehicleSpecific'
         '404':
           description: No vehicle matching identifier
-  /vehicles/stats:
-    get:
-      tags:
-        - everyone
-      summary: Get miscellaneus statistics about all vehicles and nations
-      responses:
-        '200':
-          description: Statistics have been successfully calculated
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Statistics'
   /vehicles/search/{name}:
     get:
       tags:
@@ -546,16 +537,3 @@ components:
       type: array
       items:
         type: string
-    Statistics:
-      type: array
-      items:
-        type: object
-        properties:
-          country:
-            type: string
-          total_value:
-            type: integer
-          total_req_exp:
-            type: integer
-          total_vehicles:
-            type: integer
