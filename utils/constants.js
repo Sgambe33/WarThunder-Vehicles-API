@@ -1,7 +1,7 @@
 const UNIT_TYPES = {
-    'tanks': ['lighttank', 'mediumtank', 'heavytank', 'tankdestroyer', 'spaa'],
-    'aircrafts': ['fighter', 'stormovik', 'bomber', 'divebomber'],
-    'ships': ['torpedoboat', 'submarinechaser', 'minelayer', 'transport', 'navalferrybarge', 'destroyer', 'torpedogunboat', 'ship']
+    'tanks': ['light_tank', 'medium_tank', 'heavy_tank', 'tank_destroyer', 'spaa'],
+    'aircrafts': ['fighter', 'assault', 'bomber', 'helicopter'],
+    'ships': ['destroyer', 'submarine_chaser', 'cruiser', 'battleship', 'gun_boat', 'torpedo_boat', 'torepedo_gun_boat', 'naval_ferry_barge']
 }
 
 const VERSION_REGEX = /^\d+\.\d+\.\d+\.\d+$/;
