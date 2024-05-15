@@ -3,6 +3,7 @@ const express = require('express');
 const { Vehicle } = require('../models/models');
 const { appendImages } = require("../utils/utilFunctions");
 const { Op } = require('sequelize');
+const { EVENT_VEHICLES } = require('../utils/constants');
 
 module.exports = {
     base_route: '/vehicles',
@@ -10,21 +11,24 @@ module.exports = {
         const route = express.Router({ caseSensitive: false });
 
         route.get('', async (req, res) => {
-            const { limit = 50, page = 0, country, type, era, isPremium, isGift, killstreak } = req.query;
-            const user_limit = Math.min(limit, 300);
+            const { limit = 2000, page = 0, country, type, era, isPremium, isPack, isSquadronVehicle, isOnMarketplace, excludeKillstreak="true" , excludeEventVehicles = "true" } = req.query;
+            const user_limit = Math.min(limit, 2000);
 
             const filter = {};
             if (country) filter.country = country;
             if (type) filter.vehicle_type = type;
             if (era) filter.era = era;
-            if (isPremium) filter.is_premium = isPremium;
-            if (isGift) filter.is_gift = isGift;
+            if (isPremium) filter.is_premium = isPremium === 'true';
+            if (isPack) filter.is_pack = isPack === 'true';
+            if (isSquadronVehicle) filter.squadron_vehicle = isSquadronVehicle === 'true';
+            if (isOnMarketplace) filter.on_marketplace = isOnMarketplace === 'true';
 
             const identifierFilters = [];
-            if (!killstreak) identifierFilters.push({ [Op.notLike]: '%killstreak' });
+            if (excludeEventVehicles === 'true') identifierFilters.push({ [Op.notIn]: EVENT_VEHICLES });
+            if (excludeKillstreak) identifierFilters.push({ [Op.notLike]: '%killstreak' });
             if (identifierFilters.length > 0) filter.identifier = { [Op.and]: identifierFilters };
 
-            const attributes = ['identifier', 'country', 'vehicle_type', 'era', 'arcade_br', 'realistic_br', 'simulator_br', 'event', 'release_date', 'is_premium', 'is_gift', 'value', 'req_exp', 'ge_cost'];
+            const attributes = ['identifier', 'country', 'vehicle_type', 'era', 'arcade_br', 'realistic_br', 'simulator_br', 'event', 'release_date', 'is_premium', 'is_pack', 'on_marketplace', 'squadron_vehicle', 'value', 'req_exp', 'ge_cost'];
             try {
                 const vehicles = await Vehicle.findAll({
                     where: filter,
