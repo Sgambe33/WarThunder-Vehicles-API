@@ -89,7 +89,7 @@ module.exports = {
                         return accumulator;
                     }, {}),
                     countries: [countryStats],
-                    versions: [...new Set([...currentVersions.map(v => v.version), ...oldVersions.map(v => v.version)])]
+                    versions: [...new Set([...currentVersions.map(v => v.version), ...oldVersions.map(v => v.version)])].sort((a, b) => a.localeCompare(b))
                 };
 
                 res.status(200).json(vehicleStats);
