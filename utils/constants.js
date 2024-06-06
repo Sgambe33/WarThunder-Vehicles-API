@@ -20,6 +20,8 @@ const EVENT_VEHICLES = [
     "md_460_yt_cup_2019",
     "ussr_t_72b3_2017_race",
     "ussr_t_80u_race",
+    "ussr_pr_206_race",
+    "cn_ztz_96a_race",
     "us_m1a1_abrams_yt_cup_2019",
     "ussr_t_80u_yt_cup_2019",
     "uk_challenger_ii_yt_cup_2019",
@@ -58,7 +60,13 @@ const EVENT_VEHICLES = [
     "ussr_t_50_for_tutorial",
     "us_m26_pershing_tutorial",
     "germ_panther_ii_tutorial",
-    "us_m4a2_76w_sherman_tutorial"
+    "us_m4a2_76w_sherman_tutorial",
+    "atomic_pchela_usa",
+    "atomic_pchela_lazer_usa",
+    "us_atomic_hedgie",
+    "atomic_pchela_ussr",
+    "atomic_pchela_lazer_ussr",
+    "ussr_atomic_hedgie"
 ]
 
 module.exports = {
