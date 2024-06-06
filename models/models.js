@@ -7,6 +7,9 @@ const commonAttributes = {
     },
     country: DataTypes.STRING,
     vehicle_type: DataTypes.STRING,
+    vehicle_sub_types: {
+        type: DataTypes.JSON, allowNull: true
+    },
     event: {
         type: DataTypes.STRING, allowNull: true
     },
@@ -17,11 +20,15 @@ const commonAttributes = {
     era: DataTypes.INTEGER,
     arcade_br: DataTypes.REAL,
     realistic_br: DataTypes.REAL,
+    realistic_ground_br: DataTypes.REAL,
     simulator_br: DataTypes.REAL,
+    simulator_ground_br: DataTypes.REAL,
     value: DataTypes.INTEGER,
     req_exp: DataTypes.INTEGER,
     is_premium: DataTypes.BOOLEAN,
-    is_gift: DataTypes.BOOLEAN,
+    is_pack: DataTypes.BOOLEAN,
+    on_marketplace: DataTypes.BOOLEAN,
+    squadron_vehicle: DataTypes.BOOLEAN,
     ge_cost: DataTypes.INTEGER,
     crew_total_count: DataTypes.INTEGER,
     mass: DataTypes.REAL,
@@ -85,6 +92,15 @@ const commonAttributes = {
         type: DataTypes.JSON, allowNull: true
     },
     modifications: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    ir_devices:{
+        type: DataTypes.JSON, allowNull: true
+    },
+    thermal_devices:{
+        type: DataTypes.JSON, allowNull: true
+    },
+    ballistic_computer:{
         type: DataTypes.JSON, allowNull: true
     },
     aerodynamics: {

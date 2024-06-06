@@ -17,6 +17,7 @@ fs.readdirSync(path.resolve(__dirname, 'routes')).forEach(file => {
 });
 
 app.use('/assets', express.static('assets'));
+app.use(express.static('public'));
 
 app.use('*', (req, res) => {
     res.json({
