@@ -1,26 +1,23 @@
 openapi: 3.0.0
 servers:
   - description: Main Server
-    url: https://www.wtvehiclesapi.sgambe.serv00.net/api
+    url: "https://www.wtvehiclesapi.sgambe.serv00.net/api"
   - description: Dev Server
-    url: http://localhost:3000/api
+    url: "http://localhost:3000/api"
 info:
-  description: This is the unofficial API for War Thunder Vehicles. It is not affiliated with Gaijin Entertainment.
-  version: "2.0.0"
-  title: War Thunder Unofficial API
+  description:
+    This is the unofficial API for War Thunder Vehicles. It is not affiliated
+    with Gaijin Entertainment.
+  version: 3.0.0
+  title: War Thunder Vehicles API
   contact:
     email: studente.cosimo.sgambelluri@gmail.com
   license:
-    name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-tags:
-  - name: everyone
-    description: Endpoints accessible to everyone
+    name: GNU 3.0
+    url: "https://www.gnu.org/licenses/gpl-3.0.en.html"
 paths:
   /vehicles:
     get:
-      tags:
-        - everyone
       summary: Get all vehicles
       parameters:
         - name: limit
@@ -30,10 +27,10 @@ paths:
             type: integer
             minimum: 0
             maximum: 200
-            default: 50
+            default: 200
         - name: page
           in: query
-          description: Pagination control. Takes count of current vehicle limit
+          description: Pagination control. Takes count of current vehicle limit.
           schema:
             type: integer
             minimum: 0
@@ -60,23 +57,32 @@ paths:
           schema:
             type: string
             enum:
+              - tank
               - light_tank
               - medium_tank
               - heavy_tank
               - tank_destroyer
               - spaa
+              - lbv
+              - mbv
+              - hbv
+              - exoskeleton
+              - attack_helicopter
+              - utility_helicopter
               - fighter
               - assault
               - bomber
-              - helicopter
-              - torpedo_boat
-              - submarine_chaser
-              - cruiser
-              - naval_ferry_barge
+              - ship
               - destroyer
-              - torepedo_gun_boat
+              - light_cruiser
+              - boat
+              - heavy_boat
+              - barge
+              - frigate
+              - heavy_cruiser
+              - battlecruiser
               - battleship
-              - gun_boat
+              - submarine
         - name: era
           in: query
           description: Filter by vehicle era
@@ -88,32 +94,40 @@ paths:
           in: query
           description: Filter by premium status
           schema:
-            type: integer
-            enum:
-              - 0
-              - 1
+            type: boolean
+            default: false
         - name: isPack
           in: query
-          description: If true, only marketplace vehicles will be returned. If isPremium is also true, vehicles pack will be returned.
+          description: If true, only vehicles pack will be returned.
           schema:
-            type: integer
-            enum:
-              - 0
-              - 1
+            type: boolean
+            default: false
         - name: isSquadronVehicle
           in: query
           description: If true, only squadron vehicles will be returned.
+          schema:
+            type: boolean
+            default: false
         - name: isOnMarketplace
           in: query
           description: If true, only vehicles on marketplace will be returned.
+          schema:
+            type: boolean
+            default: false
         - name: excludeKillstreak
           in: query
           description: If true, killstreak vehicles (atomic bombers, UAVs etc) will be excluded.
+          schema:
+            type: boolean
+            default: true
         - name: excludeEventVehicles
           in: query
           description: If true, event vehicles will be excluded.
+          schema:
+            type: boolean
+            default: true
       responses:
-        '200':
+        "200":
           description: Vehicles matching criteria
           content:
             application/json:
@@ -121,14 +135,13 @@ paths:
                 maxLength: 200
                 type: array
                 items:
-                  $ref: '#/components/schemas/VehicleGeneric'
+                  $ref: "#/components/schemas/VehicleGeneric"
                 maxItems: 200
-        '404':
+        "404":
           description: No vehicles matching criteria found
-  /vehicles/{identifier}:
+      description: Returns a list of vehicles that satisfies the user's filters.
+  "/vehicles/{identifier}":
     get:
-      tags:
-        - everyone
       summary: Get one specific vehicle
       parameters:
         - name: identifier
@@ -139,18 +152,16 @@ paths:
             type: string
             example: yak-7b
       responses:
-        '200':
+        "200":
           description: Vehicle matching identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VehicleSpecific'
-        '404':
+                $ref: "#/components/schemas/VehicleSpecific"
+        "404":
           description: No vehicle matching identifier
-  /vehicles/{identifier}/{version}:
+  "/vehicles/{identifier}/{version}":
     get:
-      tags:
-        - everyone
       summary: Get one specific vehicle from a specific version
       parameters:
         - name: identifier
@@ -168,18 +179,16 @@ paths:
             type: string
             example: 2.35.0.10
       responses:
-        '200':
+        "200":
           description: Vehicle matching identifier and version
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VehicleSpecific'
-        '404':
+                $ref: "#/components/schemas/VehicleSpecific"
+        "404":
           description: No vehicle matching identifier or version
-  /vehicles/search/{name}:
+  "/vehicles/search/{name}":
     get:
-      tags:
-        - everyone
       summary: Search IDs by common name
       parameters:
         - name: name
@@ -190,7 +199,7 @@ paths:
             type: string
             example: t-34
       responses:
-        '200':
+        "200":
           description: Vehicles IDs matching name
           content:
             application/json:
@@ -198,9 +207,9 @@ paths:
                 maxLength: 200
                 type: array
                 items:
-                  $ref: '#/components/schemas/VehiclesIDs'
+                  $ref: "#/components/schemas/VehiclesIDs"
                 maxItems: 200
-        '404':
+        "404":
           description: No vehicles matching name found
 components:
   schemas:
@@ -222,7 +231,13 @@ components:
         realistic_br:
           type: integer
           format: int32
+        realistic_ground_br:
+          type: integer
+          format: int32
         simulator_br:
+          type: integer
+          format: int32
+        simulator_ground_br:
           type: integer
           format: int32
         event:
@@ -233,7 +248,11 @@ components:
           format: date-time
         is_premium:
           type: boolean
-        is_gift:
+        is_pack:
+          type: boolean
+        on_marketplace:
+          type: boolean
+        squadron_vehicle:
           type: boolean
         value:
           type: integer
@@ -270,12 +289,18 @@ components:
           type: integer
           format: int32
         arcade_br:
-          type: number
+          type: integer
+          format: int32
         realistic_br:
-          type: number
+          type: integer
+          format: int32
+        realistic_ground_br:
+          type: integer
+          format: int32
         simulator_br:
-          type: number
-        value:
+          type: integer
+          format: int32
+        simulator_ground_br:
           type: integer
           format: int32
         req_exp:
@@ -283,7 +308,11 @@ components:
           format: int32
         is_premium:
           type: boolean
-        is_gift:
+        is_pack:
+          type: boolean
+        on_marketplace:
+          type: boolean
+        squadron_vehicle:
           type: boolean
         ge_cost:
           type: integer
@@ -391,6 +420,129 @@ components:
               required_modification:
                 type: string
                 format: nullable
+              icon:
+                type: string
+        ir_devices:
+          type: object
+          properties:
+            commander_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            driver_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            pilot_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            sight_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            targeting_pod_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            gunner_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+        thermal_devices:
+          type: object
+          properties:
+            commander_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            driver_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            pilot_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            sight_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            targeting_pod_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+            gunner_device:
+              type: string
+              enum:
+                - GEN1
+                - GEN2
+                - GEN2+
+                - GEN3
+                - GEN3+
+        ballistic_computer:
+          type: object
+          properties:
+            has_gun_ccip:
+              type: boolean
+            has_turret_ccip:
+              type: boolean
+            has_bombs_ccip:
+              type: boolean
+            has_rocket_ccip:
+              type: boolean
+            has_gun_ccrp:
+              type: boolean
+            has_turret_ccrp:
+              type: boolean
+            has_bombs_ccrp:
+              type: boolean
+            has_rocket_ccrp:
+              type: boolean
         aerodynamics:
           type: object
           properties:
@@ -446,10 +598,10 @@ components:
                       type: number
                     speed:
                       type: integer
-                      format: int32, nullable
+                      format: int32
                     max_distance:
                       type: integer
-                      format: int32, nullable
+                      format: int32
                     explosive_type:
                       type: string
                       format: nullable
@@ -490,10 +642,10 @@ components:
                             type: number
                           speed:
                             type: integer
-                            format: int32,nullable
+                            format: "int32,nullable"
                           max_distance:
                             type: integer
-                            format: int32,nullable
+                            format: "int32,nullable"
                           explosive_type:
                             type: string
                             format: nullable
@@ -553,10 +705,10 @@ components:
                                 type: number
                               speed:
                                 type: integer
-                                format: int32, nullable
+                                format: "int32, nullable"
                               max_distance:
                                 type: integer
-                                format: int32, nullable
+                                format: "int32, nullable"
                               explosive_type:
                                 type: string
                                 format: nullable
