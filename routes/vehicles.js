@@ -11,8 +11,8 @@ module.exports = {
         const route = express.Router({ caseSensitive: false });
 
         route.get('', async (req, res) => {
-            const { limit = 2000, page = 0, country, type, era, isPremium, isPack, isSquadronVehicle, isOnMarketplace, excludeKillstreak="true" , excludeEventVehicles = "true" } = req.query;
-            const user_limit = Math.min(limit, 2000);
+            const { limit = 200, page = 0, country, type, era, isPremium, isPack, isSquadronVehicle, isOnMarketplace, excludeKillstreak="true" , excludeEventVehicles = "true" } = req.query;
+            const user_limit = Math.min(limit, 200);
 
             const filter = {};
             if (country) filter.country = country;
