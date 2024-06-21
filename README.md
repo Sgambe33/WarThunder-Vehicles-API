@@ -1,6 +1,6 @@
 # War Thunder Vehicles API
 
-🌟Check out my new project WT Replay Saver [here](https://github.com/Sgambe33/WT-Replays-Saver)!🌟
+🌟A Discord BOT is being developed! [Add it](https://discord.com/oauth2/authorize?client_id=1137402372222623839) now to your server to preview some features!🌟
 
 ## Overview
 The War Thunder Vehicles API provides comprehensive data retrieval for all in-game vehicles, including hidden and event-specific vehicles. Access detailed information on vehicle performance, economic costs, armaments, and weapon presets. As the API is under active development, please note that some data may be subject to updates and corrections.
