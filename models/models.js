@@ -40,6 +40,18 @@ const commonAttributes = {
     train3_cost_exp: {
         type: DataTypes.INTEGER, allowNull: false
     },
+    sl_mul_arcade:{
+        type: DataTypes.REAL, allowNull: false
+    },
+    sl_mul_realistic:{
+        type: DataTypes.REAL, allowNull: false
+    },
+    sl_mul_simulator:{
+        type: DataTypes.REAL, allowNull: false
+    },
+    exp_mul:{
+        type: DataTypes.REAL, allowNull: false
+    },
     repair_time_arcade: {
         type: DataTypes.REAL, allowNull: false
     },

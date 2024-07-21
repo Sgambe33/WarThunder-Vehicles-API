@@ -263,6 +263,14 @@ components:
         ge_cost:
           type: integer
           format: int32
+        sl_mul_arcade:
+          type: number
+        sl_mul_realistic:
+          type: number
+        sl_mul_simulator:
+          type: number
+        exp_mul:
+          type: number
         images:
           type: object
           properties:
@@ -317,6 +325,14 @@ components:
         ge_cost:
           type: integer
           format: int32
+        sl_mul_arcade:
+          type: number
+        sl_mul_realistic:
+          type: number
+        sl_mul_simulator:
+          type: number
+        exp_mul:
+          type: number
         crew_total_count:
           type: integer
           format: int32

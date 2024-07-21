@@ -28,7 +28,7 @@ module.exports = {
             if (excludeKillstreak) identifierFilters.push({ [Op.notLike]: '%killstreak' });
             if (identifierFilters.length > 0) filter.identifier = { [Op.and]: identifierFilters };
 
-            const attributes = ['identifier', 'country', 'vehicle_type', 'vehicle_sub_types', 'era', 'arcade_br', 'realistic_br', 'realistic_ground_br', 'simulator_br', 'simulator_ground_br', 'event', 'release_date', 'is_premium', 'is_pack', 'on_marketplace', 'squadron_vehicle', 'value', 'req_exp', 'ge_cost'];
+            const attributes = ['identifier', 'country', 'vehicle_type', 'vehicle_sub_types', 'era', 'arcade_br', 'realistic_br', 'realistic_ground_br', 'simulator_br', 'simulator_ground_br', 'event', 'release_date', 'is_premium', 'is_pack', 'on_marketplace', 'squadron_vehicle', 'value', 'req_exp', 'ge_cost', 'sl_mul_arcade', 'sl_mul_realistic', 'sl_mul_simulator', 'exp_mul'];
             try {
                 const vehicles = await Vehicle.findAll({
                     where: filter,
