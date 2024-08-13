@@ -177,7 +177,7 @@ paths:
           required: true
           schema:
             type: string
-            example: 2.35.0.10
+            example: 2.37.0.10
       responses:
         "200":
           description: Vehicle matching identifier and version
@@ -271,6 +271,24 @@ components:
           type: number
         exp_mul:
           type: number
+        crew_total_count:
+          type: number
+        visibility:
+          type: number
+        hull_armor:
+          type: array
+          items:
+            type: integer
+            format: int32
+            minItems: 0
+            maxItems: 3
+        turret_armor:
+          type: array
+          items:
+            type: integer
+            format: int32
+          minItems: 0
+          maxItems: 3   
         images:
           type: object
           properties:
@@ -336,6 +354,22 @@ components:
         crew_total_count:
           type: integer
           format: int32
+        visibility:
+          type: number
+        hull_armor:
+          type: array
+          items:
+            type: integer
+            format: int32
+            minItems: 0
+            maxItems: 3
+        turret_armor:
+          type: array
+          items:
+            type: integer
+            format: int32
+          minItems: 0
+          maxItems: 3  
         mass:
           type: integer
           format: int32
