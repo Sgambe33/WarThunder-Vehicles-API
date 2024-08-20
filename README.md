@@ -7,8 +7,10 @@ While there is no strict call limit, I kindly ask you to consider the server's l
 
 ## Changelog
 
-### Version 4.0.0
-- TBA
+### Version 4.0.0 (WIP)
+- Radar/Sensors data
+- AAM / ATGM data
+- ...
 
 ### Version 3.0.0
 - Introduction of versioning for vehicle data retrieval.
