@@ -1,6 +1,6 @@
 {
   "name": "wtvehiclesapi",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "API for WT Vehicles",
   "main": "app.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "nodemon": "^3.0.1",
-    "sequelize": "^6.37.1",
-    "sqlite3": "^5.1.7"
+    "pg": "^8.12.0",
+    "sequelize": "^6.37.1"
   }
 }

@@ -3,26 +3,26 @@ const db = require('../utils/db')
 
 const commonAttributes = {
     identifier: {
-        type: DataTypes.STRING, allowNull: false, primaryKey: true
+        type: DataTypes.TEXT, allowNull: false, primaryKey: true
     },
-    country: DataTypes.STRING,
-    vehicle_type: DataTypes.STRING,
+    country: DataTypes.TEXT,
+    vehicle_type: DataTypes.TEXT,
     vehicle_sub_types: {
         type: DataTypes.JSON, allowNull: true
     },
     event: {
-        type: DataTypes.STRING, allowNull: true
+        type: DataTypes.TEXT, allowNull: true
     },
     release_date: {
-        type: DataTypes.DATE, allowNull: true
+        type: DataTypes.DATEONLY, allowNull: true
     },
-    version: DataTypes.STRING,
+    version: DataTypes.TEXT,
     era: DataTypes.INTEGER,
-    arcade_br: DataTypes.REAL,
-    realistic_br: DataTypes.REAL,
-    realistic_ground_br: DataTypes.REAL,
-    simulator_br: DataTypes.REAL,
-    simulator_ground_br: DataTypes.REAL,
+    arcade_br: DataTypes.FLOAT,
+    realistic_br: DataTypes.FLOAT,
+    realistic_ground_br: DataTypes.FLOAT,
+    simulator_br: DataTypes.FLOAT,
+    simulator_ground_br: DataTypes.FLOAT,
     value: DataTypes.INTEGER,
     req_exp: DataTypes.INTEGER,
     is_premium: DataTypes.BOOLEAN,
@@ -31,7 +31,14 @@ const commonAttributes = {
     squadron_vehicle: DataTypes.BOOLEAN,
     ge_cost: DataTypes.INTEGER,
     crew_total_count: DataTypes.INTEGER,
-    mass: DataTypes.REAL,
+    visibility: DataTypes.INTEGER,
+    hull_armor: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    turret_armor: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    mass: DataTypes.FLOAT,
     train1_cost: DataTypes.INTEGER,
     train2_cost: DataTypes.INTEGER,
     train3_cost_gold: {
@@ -40,23 +47,35 @@ const commonAttributes = {
     train3_cost_exp: {
         type: DataTypes.INTEGER, allowNull: false
     },
+    sl_mul_arcade:{
+        type: DataTypes.FLOAT, allowNull: false
+    },
+    sl_mul_realistic:{
+        type: DataTypes.FLOAT, allowNull: false
+    },
+    sl_mul_simulator:{
+        type: DataTypes.FLOAT, allowNull: false
+    },
+    exp_mul:{
+        type: DataTypes.FLOAT, allowNull: false
+    },
     repair_time_arcade: {
-        type: DataTypes.REAL, allowNull: false
+        type: DataTypes.FLOAT, allowNull: false
     },
     repair_time_realistic: {
-        type: DataTypes.REAL, allowNull: false
+        type: DataTypes.FLOAT, allowNull: false
     },
     repair_time_simulator: {
-        type: DataTypes.REAL, allowNull: false
+        type: DataTypes.FLOAT, allowNull: false
     },
     repair_time_no_crew_arcade: {
-        type: DataTypes.REAL, allowNull: false
+        type: DataTypes.FLOAT, allowNull: false
     },
     repair_time_no_crew_realistic: {
-        type: DataTypes.REAL, allowNull: false
+        type: DataTypes.FLOAT, allowNull: false
     },
     repair_time_no_crew_simulator: {
-        type: DataTypes.REAL, allowNull: false
+        type: DataTypes.FLOAT, allowNull: false
     },
     repair_cost_arcade: {
         type: DataTypes.INTEGER, allowNull: false
@@ -86,7 +105,7 @@ const commonAttributes = {
         type: DataTypes.INTEGER, allowNull: false
     },
     required_vehicle: {
-        type: DataTypes.STRING, allowNull: true
+        type: DataTypes.TEXT, allowNull: true
     },
     engine: {
         type: DataTypes.JSON, allowNull: true

@@ -18,7 +18,7 @@ module.exports = {
                     }
                 };
 
-                const [countryStatsQuery, vehicleStatsQuery, totalPremiumVehicles, totalGeRequired, currentVersions, oldVersions] = await Promise.all([
+                const [countryStatsQuery, vehicleStatsQuery, totalPremiumVehicles, totalGeRequired, currentVersions, oldVersions, geCostByCountry] = await Promise.all([
                     Vehicle.findAll({
                         attributes: [
                             'country',
@@ -41,7 +41,7 @@ module.exports = {
                         where: { ...commonWhere, is_premium: true }
                     }),
                     Vehicle.sum('ge_cost', {
-                        where: { ...commonWhere, is_premium: true }
+                        where: { ...commonWhere, is_premium: true, is_pack: false, on_marketplace: false }
                     }),
                     Vehicle.findAll({
                         attributes: ['version'],
@@ -50,45 +50,60 @@ module.exports = {
                     VehicleOld.findAll({
                         attributes: ['version'],
                         group: ['version']
+                    }),
+                    Vehicle.findAll({
+                        attributes: [
+                            'country',
+                            [fn('SUM', col('ge_cost')), 'total_ge_cost']
+                        ],
+                        where: { ...commonWhere, is_premium: true, is_pack: false, on_marketplace: false },
+                        group: ['country']
                     })
                 ]);
-
-                const vehicleTypeGroup = vehicleStatsQuery.reduce((accumulator, item) => {
-                    if (!accumulator[item.country]) {
-                        accumulator[item.country] = {
+                
+                const geCostMap = geCostByCountry.reduce((acc, item) => {
+                    acc[item.country] = item.dataValues.total_ge_cost;
+                    return acc;
+                }, {});
+                
+                const vehicleTypeGroup = vehicleStatsQuery.reduce((acc, item) => {
+                    if (!acc[item.country]) {
+                        acc[item.country] = {
                             total_vehicles: 0,
                             vehicle_types: {}
                         };
                     }
-                    accumulator[item.country].vehicle_types[item.vehicle_type] = item.dataValues.total_vehicles;
-                    accumulator[item.country].total_vehicles += item.dataValues.total_vehicles;
-                    return accumulator;
+                    acc[item.country].total_vehicles += parseInt(item.dataValues.total_vehicles);
+                    acc[item.country].vehicle_types[item.vehicle_type] = parseInt(item.dataValues.total_vehicles);
+                    return acc;
                 }, {});
-
+                
                 const countryStats = countryStatsQuery.reduce((accumulator, item) => {
-                    accumulator[item.country] = {
-                        total_value: item.dataValues.total_value,
-                        total_req_exp: item.dataValues.total_req_exp,
-                        total_vehicles: vehicleTypeGroup[item.country] ? vehicleTypeGroup[item.country].total_vehicles : 0,
+                    accumulator.push({
+                        country: item.country,
+                        total_value: parseInt(item.dataValues.total_value),
+                        total_req_exp: parseInt(item.dataValues.total_req_exp),
+                        total_ge_cost: parseInt(geCostMap[item.country]) || 0,
+                        total_vehicles: vehicleTypeGroup[item.country] ? parseInt(vehicleTypeGroup[item.country].total_vehicles) : 0,
                         vehicle_types: vehicleTypeGroup[item.country] ? vehicleTypeGroup[item.country].vehicle_types : {}
-                    };
+                        
+                    });
                     return accumulator;
-                }, {});
-
+                }, []);
 
                 const vehicleStats = {
-                    total_playable_vehicles: Object.values(countryStats).reduce((acc, country) => acc + country.total_vehicles, 0),
+                    total_playable_vehicles: Object.values(countryStats).reduce((acc, country) => acc + parseInt(country.total_vehicles), 0),
                     total_premium_vehicles: totalPremiumVehicles,
-                    total_sl_required: Object.values(countryStats).reduce((acc, country) => acc + country.total_value, 0),
+                    total_sl_required: Object.values(countryStats).reduce((acc, country) => acc + parseInt(country.total_value), 0),
+                    total_rp_required: Object.values(countryStats).reduce((acc, country) => acc + parseInt(country.total_req_exp), 0),
                     total_ge_required: totalGeRequired,
-                    total_rp_required: Object.values(countryStats).reduce((acc, country) => acc + country.total_req_exp, 0),
                     categories: Object.values(countryStats).reduce((accumulator, country) => {
                         Object.entries(country.vehicle_types).forEach(([vehicleType, count]) => {
                             accumulator[vehicleType] = (accumulator[vehicleType] || 0) + count;
                         });
                         return accumulator;
                     }, {}),
-                    countries: [countryStats],
+                    countries: countryStats,
                     versions: [...new Set([...currentVersions.map(v => v.version), ...oldVersions.map(v => v.version)])].sort((a, b) => a.localeCompare(b))
                 };
 
