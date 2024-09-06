@@ -1,5 +1,8 @@
 # War Thunder Vehicles API
 
+<a href='https://ko-fi.com/E1E6RA850' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi4.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+
+
 The War Thunder Vehicles API provides comprehensive data retrieval for all in-game vehicles, including hidden and event-specific vehicles. Access detailed information on vehicle performance, economic costs, armaments, and weapon presets. As the API is under active development, please note that some data may be subject to updates and corrections.
 
 Explore the full documentation [here](http://wtvehiclesapi.sgambe.serv00.net/docs).
@@ -11,6 +14,13 @@ While there is no strict call limit, I kindly ask you to consider the server's l
 - Radar/Sensors data
 - AAM / ATGM data
 - ...
+
+### Version 3.1.0
+- Finished localization for:
+  - Weapons
+  - Vehicles
+  - Ammos
+  - Ammo types
 
 ### Version 3.0.0
 - Introduction of versioning for vehicle data retrieval.
@@ -27,14 +37,8 @@ While there is no strict call limit, I kindly ask you to consider the server's l
 
 ## Projects using this API
 - [Snail Stats](https://snail-stats.vercel.app/) by [@Hakzar](https://github.com/Hakzar)
+- [Wardle](https://wardlegame.com/) by [@Term164](https://github.com/Term164)
+- [Flutter WT Wiki](https://github.com/Sgambe33/flutter_wt_wiki) by [@me](https://github.com/Sgambe33)
 
-
-## Roadmap
-Stay informed about the project's progress and future plans by visiting the [roadmap](https://github.com/users/Sgambe33/projects/4/views/1). I welcome user contributions; please feel free to submit issues for additional data requests.
-
-## Contributing
-*Currently looking for helpers, if interested open issue*
-Contributors with experience in Python, JSON parsing, SQLite, and a general understanding of War Thunder's in-game mechanics are highly valued. If you're interested in collaborating, please open an issue to discuss potential contributions.
-<a href='https://ko-fi.com/E1E6RA850' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi4.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 ## Disclaimer
 This API is an independent project and is not affiliated with Gaijin Entertainment in any capacity.
