@@ -11,13 +11,15 @@ module.exports = {
         const route = express.Router({ caseSensitive: false });
 
         route.get('', async (req, res) => {
-            const { limit = 200, page = 0, country, type, era, isPremium, isPack, isSquadronVehicle, isOnMarketplace, excludeKillstreak="true" , excludeEventVehicles = "true" } = req.query;
+            const { limit = 200, page = 0, country, type, era, isPremium, isPack, isSquadronVehicle, isOnMarketplace, excludeKillstreak = "true", excludeEventVehicles = "true" } = req.query;
             const user_limit = Math.min(limit, 200);
 
             const filter = {};
             if (country) filter.country = country;
-            if (type) filter.vehicle_type = type;
-            if (era) filter.era = era;
+            if (type) {
+                const typesArray = Array.isArray(type) ? type : type.split(',');
+                filter.vehicle_type = { [Op.in]: typesArray };
+            } if (era) filter.era = era;
             if (isPremium) filter.is_premium = isPremium === 'true';
             if (isPack) filter.is_pack = isPack === 'true';
             if (isSquadronVehicle) filter.squadron_vehicle = isSquadronVehicle === 'true';
