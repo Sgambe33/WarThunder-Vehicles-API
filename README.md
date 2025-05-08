@@ -7,6 +7,8 @@ The War Thunder Vehicles API provides comprehensive data retrieval for all in-ga
 Explore the full documentation [here](http://wtvehiclesapi.sgambe.serv00.net/docs).
 While there is no strict call limit, I kindly ask you to consider the server's limited RAM capacity and avoid excessive requests.
 
+A [new page](http://wtvehiclesapi.sgambe.serv00.net/differences) has been added. It allows to view differences across game versions of the same vehicle. It's ugly I know. If you are a good web developer and willing to improve it, I'll accept your PR.
+
 ## Features
 - Localization for:
   - Weapons
@@ -33,8 +35,6 @@ While there is no strict call limit, I kindly ask you to consider the server's l
 - [Snail Stats](https://snail-stats.vercel.app/) by [@Hakzar](https://github.com/Hakzar)
 - [Wardle](https://wardlegame.com/) by [@Term164](https://github.com/Term164)
 - [ThunderSkill](https://thunderskill.com/) by [@ThunderSkill](https://github.com/Thunderskill)
-- [Flutter WT Wiki](https://github.com/Sgambe33/flutter_wt_wiki) by [@me](https://github.com/Sgambe33)
-
 
 ## Disclaimer
 This API is an independent project and is not affiliated with Gaijin Entertainment in any capacity.
