@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Version Comparison</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 1rem;
+      background: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    form div {
+      flex: 1 1 200px;
+      min-width: 150px;
+    }
+    @media (max-width: 600px) {
+      form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      background: #007bff;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      align-self: center;
+      margin-top: 1.5rem;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #comparison {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f8f8f8;
+    }
+    tr.diff td {
+      background: #ffe5e5;
+    }
+    .nested-table {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      border: none;
+      width: auto;
+    }
+    .nested-table th,
+    .nested-table td {
+      border: none;
+      padding: 0.3rem;
+    }
+    ul {
+      margin: 0.3rem 0 0.3rem 1.2rem;
+      padding-left: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vehicle Version Side-by-Side Comparison</h1>
+  <form id="compareForm">
+    <div>
+      <label for="identifier">Identifier:</label>
+      <input type="text" id="identifier" placeholder="e.g. yak-7b" required>
+    </div>
+    <div>
+      <label for="version1">Version 1:</label>
+      <input type="text" id="version1" list="versionList" placeholder="choose version" required>
+    </div>
+    <div>
+      <label for="version2">Version 2:</label>
+      <input type="text" id="version2" list="versionList" placeholder="choose version" required>
+    </div>
+    <button type="submit">Compare</button>
+  </form>
+  <datalist id="versionList"></datalist>
+  <div id="comparison"></div>
+
+  <script>
+    const baseUrl = 'https://www.wtvehiclesapi.sgambe.serv00.net/api';
+    let versionTimer;
+    const versionDatalist = document.getElementById('versionList');
+
+    // Fetch available versions after user stops typing identifier
+    document.getElementById('identifier').addEventListener('input', e => {
+      clearTimeout(versionTimer);
+      versionTimer = setTimeout(async () => {
+        const id = e.target.value.trim();
+        if (!id) return;
+        try {
+          const res = await fetch(`${baseUrl}/vehicles/${encodeURIComponent(id)}`);
+          if (!res.ok) return;
+          const vehicle = await res.json();
+          const versions = vehicle.versions || vehicle.availableVersions || [];
+          versionDatalist.innerHTML = '';
+          versions.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v;
+            versionDatalist.appendChild(opt);
+          });
+        } catch (err) {
+          console.error('Error fetching versions:', err);
+        }
+      }, 500);
+    });
+
+    document.getElementById('compareForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const id = document.getElementById('identifier').value.trim();
+      const v1 = document.getElementById('version1').value.trim();
+      const v2 = document.getElementById('version2').value.trim();
+      compareVersions(id, v1, v2);
+    });
+
+    async function compareVersions(id, v1, v2) {
+      const url1 = `${baseUrl}/vehicles/${encodeURIComponent(id)}/${encodeURIComponent(v1)}`;
+      const url2 = `${baseUrl}/vehicles/${encodeURIComponent(id)}/${encodeURIComponent(v2)}`;
+      try {
+        const [res1, res2] = await Promise.all([fetch(url1), fetch(url2)]);
+        if (!res1.ok || !res2.ok) throw new Error('One or both versions not found');
+        const data1 = await res1.json();
+        const data2 = await res2.json();
+        renderComparison(data1, data2, v1, v2);
+      } catch (err) {
+        document.getElementById('comparison').innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
+      }
+    }
+
+    function formatValue(val) {
+      if (Array.isArray(val)) {
+        if (val.every(item => ['string','number','boolean'].includes(typeof item))) {
+          const ul = document.createElement('ul');
+          val.forEach(item => { const li = document.createElement('li'); li.textContent = item; ul.appendChild(li); });
+          return ul;
+        }
+        const tbl = document.createElement('table'); tbl.classList.add('nested-table');
+        const keys = Array.from(new Set(val.flatMap(item => Object.keys(item)))).sort();
+        const thead = document.createElement('thead'); const hrow = document.createElement('tr');
+        keys.forEach(k => { const th = document.createElement('th'); th.textContent = k; hrow.appendChild(th); });
+        thead.appendChild(hrow); tbl.appendChild(thead);
+        const tbody = document.createElement('tbody');
+        val.forEach(item => { const row = document.createElement('tr'); keys.forEach(k => { const td = document.createElement('td'); let v = item[k]; if (typeof v === 'object' && v !== null) v = JSON.stringify(v); td.textContent = v ?? ''; row.appendChild(td); }); tbody.appendChild(row); });
+        tbl.appendChild(tbody);
+        return tbl;
+      } else if (val !== null && typeof val === 'object') {
+        const tbl = document.createElement('table'); tbl.classList.add('nested-table');
+        const tbody = document.createElement('tbody');
+        Object.keys(val).sort().forEach(k => { const tr = document.createElement('tr'); const tdKey = document.createElement('td'); tdKey.textContent = k; const tdVal = document.createElement('td'); let v = val[k]; if (typeof v === 'object' && v !== null) v = JSON.stringify(v); tdVal.textContent = v; tr.appendChild(tdKey); tr.appendChild(tdVal); tbody.appendChild(tr); });
+        tbl.appendChild(tbody);
+        return tbl;
+      }
+      const span = document.createElement('span'); span.textContent = val; return span;
+    }
+
+    function renderComparison(a, b, v1, v2) {
+      const container = document.getElementById('comparison'); container.innerHTML = '';
+      const tbl = document.createElement('table');
+      const thead = document.createElement('thead'); const headerRow = document.createElement('tr');
+      ['Attribute', v1, v2].forEach(txt => { const th = document.createElement('th'); th.textContent = txt; headerRow.appendChild(th); });
+      thead.appendChild(headerRow); tbl.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      const keys = Array.from(new Set([...Object.keys(a), ...Object.keys(b)])).sort();
+      keys.forEach(key => {
+        const val1 = a[key]; const val2 = b[key];
+        let diff = true;
+        if (Array.isArray(val1) && Array.isArray(val2) && val1.every(i => ['string','number','boolean'].includes(typeof i)) && val2.every(i => ['string','number','boolean'].includes(typeof i))) {
+          const s1 = [...val1].sort(); const s2 = [...val2].sort(); diff = JSON.stringify(s1) !== JSON.stringify(s2);
+        } else diff = JSON.stringify(val1) !== JSON.stringify(val2);
+        const row = document.createElement('tr'); if (diff) row.classList.add('diff');
+        const tdKey = document.createElement('td'); tdKey.textContent = key;
+        const td1 = document.createElement('td'); td1.appendChild(formatValue(val1));
+        const td2 = document.createElement('td'); td2.appendChild(formatValue(val2));
+        row.appendChild(tdKey); row.appendChild(td1); row.appendChild(td2);
+        tbody.appendChild(row);
+      });
+      tbl.appendChild(tbody); container.appendChild(tbl);
+    }
+  </script>
+</body>
+</html>
