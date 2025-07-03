@@ -35,6 +35,7 @@ A [new page](http://wtvehiclesapi.sgambe.serv00.net/differences) has been added.
 - [Snail Stats](https://snail-stats.vercel.app/) by [@Hakzar](https://github.com/Hakzar)
 - [Wardle](https://wardlegame.com/) by [@Term164](https://github.com/Term164)
 - [ThunderSkill](https://thunderskill.com/) by [@ThunderSkill](https://github.com/Thunderskill)
+- [ThunderHub](https://www.thunderhub.net/)
 
 ## Disclaimer
 This API is an independent project and is not affiliated with Gaijin Entertainment in any capacity.
