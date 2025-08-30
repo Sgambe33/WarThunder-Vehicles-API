@@ -1,8 +1,8 @@
 const {Vehicle} = require('../models/models');
 
 async function latestVersion(){
-    const randomVehicle = await Vehicle.findOne();
-    return randomVehicle.dataValues.version;
+    const result = await Vehicle.max('version');
+    return result;
 }
 
 function appendImages(queryResult, req){
