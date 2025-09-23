@@ -1,145 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vehicle Version Comparison</title>
+
+  <!-- jsondiffpatch -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsondiffpatch/public/formatters-styles/html.css">
+  <script src="https://cdn.jsdelivr.net/npm/jsondiffpatch/dist/jsondiffpatch.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsondiffpatch/public/formatters/html.js"></script>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 1rem;
-      background: #f4f4f4;
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --accent: #0066ff;
+      --success: #06b6a4;
+      --danger: #ef4444;
+      --glass: rgba(255, 255, 255, 0.6);
+      font-family: Inter, Roboto, -apple-system, "Segoe UI", Arial;
     }
-    h1 {
-      text-align: center;
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      margin: 0;
+      padding: 1.25rem;
+      background: linear-gradient(180deg, var(--bg), #eef2f6 120%);
+      color: #0f172a;
+    }
+
+    header {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
       margin-bottom: 1rem;
     }
-    form {
+
+    header h1 {
+      font-size: 1.25rem;
+      margin: 0
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem
+    }
+
+    .topbar {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap
     }
-    form div {
-      flex: 1 1 200px;
-      min-width: 150px;
+
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 0.8rem;
+      box-shadow: 0 6px 18px rgba(12, 23, 40, 0.06);
     }
+
+    form#compareForm {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      flex-wrap: wrap
+    }
+
+    form#compareForm .field {
+      min-width: 180px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #e6e9ef
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      cursor: pointer
+    }
+
+    button.ghost {
+      background: transparent;
+      border: 1px solid #e6e9ef;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--muted)
+    }
+
+    main.grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      /* desktop layout */
+      grid-template-rows: 1fr;
+      /* let section stretch */
+      gap: 1rem;
+      margin-top: 1rem;
+      height: calc(100vh - 140px);
+      /* adjust for header + topbar */
+    }
+
+    /* mobile / tablet: stack panels */
+    @media (max-width: 900px) {
+      main.grid {
+        grid-template-columns: 1fr;
+        /* single column */
+        grid-auto-rows: min-content auto;
+        /* aside takes natural height, section fills rest */
+      }
+
+      #metaPanel {
+        order: 1;
+        /* meta panel on top */
+      }
+
+      main.grid>section {
+        order: 2;
+        overflow: auto;
+        /* allow scrolling of diff content */
+      }
+    }
+
+    /* smaller mobile tweaks */
     @media (max-width: 600px) {
-      form {
+      body {
+        padding: 0.5rem;
+      }
+
+      form#compareForm {
         flex-direction: column;
         align-items: stretch;
       }
+
+      form#compareForm .field {
+        min-width: 100%;
+        flex: none;
+      }
+
+      .thumb {
+        height: 120px;
+      }
+
+      .controls-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 0.25rem;
+
+    /* left panel */
+    #metaPanel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem
     }
-    input, select {
+
+    .thumb {
       width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      height: 160px;
+      background: #f2f4f7;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden
     }
-    button {
-      padding: 0.6rem 1.2rem;
-      border: none;
-      background: #007bff;
-      color: #fff;
-      border-radius: 4px;
-      cursor: pointer;
-      align-self: center;
-      margin-top: 1.5rem;
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover
     }
-    button:hover {
-      background: #0056b3;
+
+    .meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem
     }
+
+    .meta-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem
+    }
+
+    .meta-item b {
+      color: #0b1220
+    }
+
+    /* center panel - diff */
     #comparison {
-      overflow-x: auto;
+      padding: 0.6rem;
+      overflow: auto
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin-bottom: 2rem;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 0.75rem;
-      text-align: left;
-      vertical-align: top;
-    }
-    th {
-      background: #f8f8f8;
-    }
-    tr.diff td {
-      background: #ffe5e5;
-    }
-    .nested-table {
-      margin-top: 0.5rem;
+
+    #comparison h2 {
+      margin-top: 0;
       margin-bottom: 0.5rem;
-      border: none;
-      width: auto;
+      font-size: 1rem
     }
-    .nested-table th,
-    .nested-table td {
-      border: none;
-      padding: 0.3rem;
+
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem
     }
-    ul {
-      margin: 0.3rem 0 0.3rem 1.2rem;
-      padding-left: 1rem;
+
+    .toolbar .info {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-left: auto
+    }
+
+    /* small screens */
+    @media(max-width:1100px) {
+      main.grid {
+        grid-template-columns: 1fr;
+      }
+
+      .jsonBox {
+        height: 240px
+      }
+    }
+
+    /* hide unchanged nodes when user toggles */
+    .hide-unchanged .jsondiffpatch-unchanged,
+    .hide-unchanged .unchanged {
+      display: none !important
+    }
+
+    /* subtle improvements to diff look */
+    .jsondiffpatch-html .jsondiffpatch-value.jsondiffpatch-added {
+      background: linear-gradient(90deg, #e6f7ff, #f4fbff)
+    }
+
+    .jsondiffpatch-html .jsondiffpatch-value.jsondiffpatch-deleted {
+      background: linear-gradient(90deg, #fff1f0, #fff8f7)
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center
     }
   </style>
 </head>
+
 <body>
-  <h1>Vehicle Version Side-by-Side Comparison</h1>
-  <form id="compareForm">
-    <div>
-      <label for="identifier">Identifier:</label>
-      <input type="text" id="identifier" placeholder="e.g. yak-7b" required>
+  <header>
+    <div style="flex:1">
+      <h1>Vehicle Version Comparison</h1>
     </div>
-    <div>
-      <label for="version1">Version 1:</label>
-      <input type="text" id="version1" list="versionList" placeholder="choose version" required>
-    </div>
-    <div>
-      <label for="version2">Version 2:</label>
-      <input type="text" id="version2" list="versionList" placeholder="choose version" required>
-    </div>
-    <button type="submit">Compare</button>
-  </form>
-  <datalist id="versionList"></datalist>
-  <div id="comparison"></div>
+  </header>
+
+  <section class="card topbar">
+    <form id="compareForm">
+      <div class="field">
+        <label for="identifier">Identifier</label>
+        <input id="identifier" placeholder="e.g. yak-7b" required />
+      </div>
+
+      <div class="field">
+        <label for="version1">Version 1</label>
+        <select id="version1" required>
+          <option value="">--Please choose a version--</option>
+
+        </select>
+      </div>
+      <div class="field">
+        <label for="version2">Version 2</label>
+        <select id="version2" placeholder="choose version" required>
+          <option value="">--Please choose a version--</option>
+        </select>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <button type="submit" class="primary">Compare</button>
+      </div>
+
+    </form>
+  </section>
+
+  <main class="grid">
+    <aside id="metaPanel" class="card" aria-label="meta">
+      <div class="thumb" id="vehicleThumb"> <span style="color:var(--muted)">No image</span> </div>
+      <div class="meta-list card" style="padding:0.6rem">
+        <div class="meta-item"><span>Identifier</span><b id="meta-id">—</b></div>
+        <div class="meta-item"><span>Country</span><b id="meta-country">—</b></div>
+        <div class="meta-item"><span>Type</span><b id="meta-type">—</b></div>
+        <div class="meta-item"><span>BR (AB / RB / SB)</span><b id="meta-br">—</b></div>
+        <div class="meta-item"><span>Mass</span><b id="meta-mass">—</b></div>
+        <div class="meta-item"><span>Mods</span><b id="meta-mods">—</b></div>
+      </div>
+    </aside>
+
+    <section class="card" style="padding:0.6rem;display:flex;flex-direction:column;gap:0.6rem">
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <h2 id="diffTitle" style="margin:0;font-size:1rem">Differences</h2>
+        <div class="toolbar" style="margin-left:auto">
+          <div class="controls-row">
+            <label style="display:flex;align-items:center;gap:0.4rem;white-space:nowrap"><input type="checkbox"
+                id="detectMove" checked /> Detect moves</label>
+            <label style="display:flex;align-items:center;gap:0.4rem;white-space:nowrap"><input type="checkbox"
+                id="hideUnchanged" checked /> Hide unchanged</label>
+            <button id="btnDownload" class="ghost">Download delta</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="comparison"><!-- diff render target --></div>
+    </section>
+  </main>
 
   <script>
     const baseUrl = 'https://www.wtvehiclesapi.sgambe.serv00.net/api';
     let versionTimer;
-    const versionDatalist = document.getElementById('versionList');
+    const version1Select = document.getElementById('version1');
+    const version2Select = document.getElementById('version2');
 
-    // Fetch available versions after user stops typing identifier
+    function populateDatalist(ids) {
+      console.log("Clearing old versions...");
+      version1Select.innerHTML = '<option value="">--Please choose a version--</option>';
+      version2Select.innerHTML = '<option value="">--Please choose a version--</option>';
+
+      console.log("Adding versions...");
+      (ids || []).slice(0, 200).forEach(v => {
+        console.log("Adding version " + v);
+
+        const opt1 = document.createElement('option');
+        opt1.value = v;
+        opt1.text = v;
+
+        const opt2 = document.createElement('option');
+        opt2.value = v;
+        opt2.text = v;
+
+        version1Select.add(opt1);
+        version2Select.add(opt2);
+      });
+    }
+
+    // helper: fill meta and thumbnail
+    async function fillMetaFromVehicle(vehicle, queryFallback) {
+      document.getElementById('meta-id').textContent = vehicle.identifier || queryFallback || '—';
+      document.getElementById('meta-country').textContent = vehicle.country || '—';
+      document.getElementById('meta-type').textContent = vehicle.vehicle_type || '—';
+      document.getElementById('meta-br').textContent = `${vehicle.arcade_br ?? '—'} / ${vehicle.realistic_br ?? '—'} / ${vehicle.simulator_br ?? '—'}`;
+      document.getElementById('meta-mass').textContent = vehicle.mass ?? '—';
+      document.getElementById('meta-mods').textContent = (vehicle.modifications || []).length;
+
+      const thumb = document.getElementById('vehicleThumb');
+      if (vehicle.images && vehicle.images.image) {
+        thumb.innerHTML = '';
+        const img = document.createElement('img'); img.src = vehicle.images.image; img.alt = vehicle.identifier || 'vehicle';
+        thumb.appendChild(img);
+      } else {
+        thumb.innerHTML = '<span style="color:var(--muted)">No image</span>';
+      }
+
+      // also populate versions list if available
+      const versions = vehicle.versions || vehicle.availableVersions || [];
+      if (versions.length) populateDatalist(versions);
+    }
+
+    // Try to fetch full vehicle by id and fill meta (safe wrapper)
+    async function fetchVehicleMeta(identifier) {
+      if (!identifier) return;
+      try {
+        const res = await fetch(`${baseUrl}/vehicles/${encodeURIComponent(identifier)}`);
+        if (!res.ok) return;
+        const vehicle = await res.json();
+        await fillMetaFromVehicle(vehicle, identifier);
+      } catch (err) {
+        console.error('Error fetching vehicle:', err);
+      }
+    }
+
+    // Use the search endpoint to help find identifiers as the user types.
+    // The search endpoint may return different shapes (array of strings, array of objects, or an object with results).
     document.getElementById('identifier').addEventListener('input', e => {
       clearTimeout(versionTimer);
       versionTimer = setTimeout(async () => {
-        const id = e.target.value.trim();
-        if (!id) return;
+        const q = e.target.value.trim();
+        if (!q) return;
         try {
-          const res = await fetch(`${baseUrl}/vehicles/${encodeURIComponent(id)}`);
-          if (!res.ok) return;
-          const vehicle = await res.json();
-          const versions = vehicle.versions || vehicle.availableVersions || [];
-          versionDatalist.innerHTML = '';
-          versions.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v;
-            versionDatalist.appendChild(opt);
-          });
+          // prefer the search endpoint
+          const searchUrl = `${baseUrl}/vehicles/search/${encodeURIComponent(q)}`;
+          const sres = await fetch(searchUrl);
+          if (sres.ok) {
+            const results = await sres.json();
+            let ids = [];
+            if (Array.isArray(results)) {
+              if (results.length && typeof results[0] === 'string') ids = results;
+              else ids = results.map(r => (r && (r.identifier || r.name || r.id)) || (typeof r === 'string' ? r : null)).filter(Boolean);
+            } else if (results && typeof results === 'object') {
+              const arr = results.results || results.items || results.data || [];
+              ids = (Array.isArray(arr) ? arr.map(r => (r && (r.identifier || r.name || r.id)) || (typeof r === 'string' ? r : null)).filter(Boolean) : []);
+            }
+
+            // if the typed query exactly matches a result, fetch full vehicle metadata
+            const exact = ids.find(x => x.toLowerCase() === q.toLowerCase());
+            if (exact) await fetchVehicleMeta(exact);
+          } else {
+            // fallback: try direct vehicle fetch by id (old behaviour)
+            try {
+              const res = await fetch(`${baseUrl}/vehicles/${encodeURIComponent(q)}`);
+              if (res.ok) {
+                const vehicle = await res.json();
+                const versions = vehicle.versions || vehicle.availableVersions || [];
+                populateDatalist(versions);
+                await fillMetaFromVehicle(vehicle, q);
+              }
+            } catch (e) {
+              // ignore
+            }
+          }
         } catch (err) {
-          console.error('Error fetching versions:', err);
+          console.error('Error searching vehicles:', err);
         }
-      }, 500);
+      }, 350);
     });
 
     document.getElementById('compareForm').addEventListener('submit', e => {
@@ -160,59 +467,76 @@
         const data2 = await res2.json();
         renderComparison(data1, data2, v1, v2);
       } catch (err) {
-        document.getElementById('comparison').innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
+        document.getElementById('comparison').innerHTML = `<p style="color:red;text-align:center">Error: ${err.message}</p>`;
       }
     }
 
-    function formatValue(val) {
-      if (Array.isArray(val)) {
-        if (val.every(item => ['string','number','boolean'].includes(typeof item))) {
-          const ul = document.createElement('ul');
-          val.forEach(item => { const li = document.createElement('li'); li.textContent = item; ul.appendChild(li); });
-          return ul;
-        }
-        const tbl = document.createElement('table'); tbl.classList.add('nested-table');
-        const keys = Array.from(new Set(val.flatMap(item => Object.keys(item)))).sort();
-        const thead = document.createElement('thead'); const hrow = document.createElement('tr');
-        keys.forEach(k => { const th = document.createElement('th'); th.textContent = k; hrow.appendChild(th); });
-        thead.appendChild(hrow); tbl.appendChild(thead);
-        const tbody = document.createElement('tbody');
-        val.forEach(item => { const row = document.createElement('tr'); keys.forEach(k => { const td = document.createElement('td'); let v = item[k]; if (typeof v === 'object' && v !== null) v = JSON.stringify(v); td.textContent = v ?? ''; row.appendChild(td); }); tbody.appendChild(row); });
-        tbl.appendChild(tbody);
-        return tbl;
-      } else if (val !== null && typeof val === 'object') {
-        const tbl = document.createElement('table'); tbl.classList.add('nested-table');
-        const tbody = document.createElement('tbody');
-        Object.keys(val).sort().forEach(k => { const tr = document.createElement('tr'); const tdKey = document.createElement('td'); tdKey.textContent = k; const tdVal = document.createElement('td'); let v = val[k]; if (typeof v === 'object' && v !== null) v = JSON.stringify(v); tdVal.textContent = v; tr.appendChild(tdKey); tr.appendChild(tdVal); tbody.appendChild(tr); });
-        tbl.appendChild(tbody);
-        return tbl;
-      }
-      const span = document.createElement('span'); span.textContent = val; return span;
+    function createDiffPatcher() {
+      const priority = "name"; // use 'name' as unique key for arrays
+      return jsondiffpatch.create({
+        objectHash: function (obj, index) {
+          if (!obj || typeof obj !== 'object') return '$$' + String(obj) + ':' + index;
+          if (obj.name) return obj.name; // use name if available
+          if (obj.identifier) return obj.identifier;
+          if (obj.id) return obj.id;
+          return '$$index:' + index;
+        },
+        arrays: {
+          detectMove: document.getElementById('detectMove').checked,
+          includeValueOnMove: false,
+        },
+        textDiff: { minLength: 60 }
+      });
     }
+
 
     function renderComparison(a, b, v1, v2) {
-      const container = document.getElementById('comparison'); container.innerHTML = '';
-      const tbl = document.createElement('table');
-      const thead = document.createElement('thead'); const headerRow = document.createElement('tr');
-      ['Attribute', v1, v2].forEach(txt => { const th = document.createElement('th'); th.textContent = txt; headerRow.appendChild(th); });
-      thead.appendChild(headerRow); tbl.appendChild(thead);
-      const tbody = document.createElement('tbody');
-      const keys = Array.from(new Set([...Object.keys(a), ...Object.keys(b)])).sort();
-      keys.forEach(key => {
-        const val1 = a[key]; const val2 = b[key];
-        let diff = true;
-        if (Array.isArray(val1) && Array.isArray(val2) && val1.every(i => ['string','number','boolean'].includes(typeof i)) && val2.every(i => ['string','number','boolean'].includes(typeof i))) {
-          const s1 = [...val1].sort(); const s2 = [...val2].sort(); diff = JSON.stringify(s1) !== JSON.stringify(s2);
-        } else diff = JSON.stringify(val1) !== JSON.stringify(val2);
-        const row = document.createElement('tr'); if (diff) row.classList.add('diff');
-        const tdKey = document.createElement('td'); tdKey.textContent = key;
-        const td1 = document.createElement('td'); td1.appendChild(formatValue(val1));
-        const td2 = document.createElement('td'); td2.appendChild(formatValue(val2));
-        row.appendChild(tdKey); row.appendChild(td1); row.appendChild(td2);
-        tbody.appendChild(row);
-      });
-      tbl.appendChild(tbody); container.appendChild(tbl);
+      const container = document.getElementById('comparison');
+      document.getElementById('diffTitle').textContent = `Differences ${v1} ↔ ${v2}`;
+
+      const diffpatcher = createDiffPatcher();
+      const delta = diffpatcher.diff(a, b);
+
+      if (!delta) {
+        container.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--success)">No differences found 🎉</div>`;
+        return;
+      }
+
+      const formatter = jsondiffpatch.formatters.html;
+      // format will produce a DOM string
+      const diffHtml = formatter.format(delta, a);
+      container.innerHTML = diffHtml;
+
+      // toggle hide unchanged
+      toggleHideUnchanged();
+
+      // attach download button
+      document.getElementById('btnDownload').onclick = (ev) => {
+        ev.preventDefault();
+        const blob = new Blob([JSON.stringify(delta, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const aLink = document.createElement('a');
+        aLink.href = url; aLink.download = `${v1}_vs_${v2}_delta.json`;
+        document.body.appendChild(aLink); aLink.click(); aLink.remove(); URL.revokeObjectURL(url);
+      };
     }
+
+    function toggleHideUnchanged() {
+      const shouldHide = document.getElementById('hideUnchanged').checked;
+      const root = document.querySelector('#comparison');
+      if (shouldHide) root.classList.add('hide-unchanged'); else root.classList.remove('hide-unchanged');
+    }
+
+    // UI event handlers
+    document.getElementById('hideUnchanged').addEventListener('change', toggleHideUnchanged);
+    document.getElementById('detectMove').addEventListener('change', () => {
+      // if we already have left/right loaded, re-run compare to apply new settings
+      const id = document.getElementById('identifier').value.trim();
+      const v1 = document.getElementById('version1').value.trim();
+      const v2 = document.getElementById('version2').value.trim();
+      if (id && v1 && v2) compareVersions(id, v1, v2);
+    });
   </script>
 </body>
+
 </html>
