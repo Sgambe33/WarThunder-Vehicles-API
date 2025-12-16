@@ -148,6 +148,14 @@ paths:
         schema:
           type: string
           example: yak-7b
+      - name: version
+        in: query
+        description: The optional vehicle version
+        required: false
+        schema:
+          type: string
+          example: 2.53.0.7
+
       responses:
         "200":
           description: Vehicle matching identifier
@@ -157,33 +165,7 @@ paths:
                 $ref: "#/components/schemas/VehicleSpecific"
         "404":
           description: No vehicle matching identifier
-  "/vehicles/{identifier}/{version}":
-    get:
-      summary: Get one specific vehicle from a specific version
-      parameters:
-      - name: identifier
-        in: path
-        description: Vehicle identifier
-        required: true
-        schema:
-          type: string
-          example: yak-7b
-      - name: version
-        in: path
-        description: Game version
-        required: true
-        schema:
-          type: string
-          example: 2.37.0.10
-      responses:
-        "200":
-          description: Vehicle matching identifier and version
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/VehicleSpecific"
-        "404":
-          description: No vehicle matching identifier or version
+
   "/vehicles/search/{name}":
     get:
       summary: Search IDs by common name
@@ -211,13 +193,18 @@ paths:
     get:
       summary: Get comprehensive vehicle statistics
       description: Returns aggregated data about vehicles including costs, categories, and national breakdowns
+      parameters:
+      - name: version
+        in: query
+        description: The version of the game to calculate statistics on
+        required: false
+        schema:
+          type: string
+          example: 2.53.0.7
       responses:
         '200':
           description: Successful response with vehicle statistics
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VehicleStatistics'
+
 components:
   schemas:
     VehicleGeneric:
@@ -804,81 +791,3 @@ components:
       type: array
       items:
         type: string
-    VehicleStatistics:
-      type: object
-      properties:
-        total_playable_vehicles:
-          type: integer
-          description: Total number of playable vehicles in the game
-          example: 2909
-        total_premium_vehicles:
-          type: integer
-          description: Number of premium vehicles requiring real currency
-          example: 686
-        total_sl_required:
-          type: integer
-          description: Total Silver Lions required to purchase all vehicles
-          example: 670684500
-        total_rp_required:
-          type: integer
-          description: Total Research Points required to unlock all vehicles
-          example: 228903100
-        total_ge_required:
-          type: integer
-          description: Total Golden Eagles required for premium vehicles
-          example: 1623640
-        categories:
-          type: object
-          description: Vehicle counts by category
-          properties:
-            assault:
-              type: integer
-              example: 215
-            attack_helicopter:
-              type: integer
-              example: 72
-            # Continue with other category properties following same pattern
-        countries:
-          type: array
-          items:
-            $ref: '#/components/schemas/CountryStatistics'
-        versions:
-          type: array
-          description: Game versions included in this statistics set
-          items:
-            type: string
-            example: "2.29.0.111"
-    CountryStatistics:
-      type: object
-      properties:
-        country:
-          type: string
-          description: Nation identifier
-          example: "usa"
-        total_value:
-          type: integer
-          description: Total SL value of all vehicles
-        total_req_exp:
-          type: integer
-          description: Total RP required for research
-        total_ge_cost:
-          type: integer
-          description: Total GE required for premiums
-        total_vehicles:
-          type: integer
-          description: Total vehicles in nation
-        vehicle_types:
-          $ref: '#/components/schemas/VehicleTypeCounts'
-    VehicleTypeCounts:
-      type: object
-      description: Vehicle counts by military classification
-      properties:
-        assault:
-          type: integer
-          example: 30
-        attack_helicopter:
-          type: integer
-          example: 3
-        # Include all other vehicle type properties following same pattern
-      additionalProperties:
-        type: integer
