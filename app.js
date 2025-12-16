@@ -19,7 +19,7 @@ fs.readdirSync(path.resolve(__dirname, 'routes')).forEach(file => {
 app.use('/assets', express.static('assets'));
 app.use(express.static('public'));
 
-app.use('*', (req, res) => {
+app.use('/{*unrouted}', (req, res) => {
     res.json({
         at: new Date().toISOString(), method: req.method, hostname: req.hostname, query: req.query, params: req.params
     });
