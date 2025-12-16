@@ -66,7 +66,8 @@ const EVENT_VEHICLES = [
     "us_atomic_hedgie",
     "atomic_pchela_ussr",
     "atomic_pchela_lazer_ussr",
-    "ussr_atomic_hedgie"
+    "ussr_atomic_hedgie",
+    "us_m8_scott_snowball"
 ]
 
 module.exports = {
