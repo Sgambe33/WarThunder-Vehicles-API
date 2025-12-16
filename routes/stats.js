@@ -4,6 +4,7 @@ const { EVENT_VEHICLES } = require('../utils/constants');
 const { Vehicle, VehicleOld } = require('../models/models');
 const { Op, fn, col } = require('sequelize');
 
+
 module.exports = {
     base_route: '/vehicles/stats',
     handler: () => {
@@ -11,6 +12,7 @@ module.exports = {
 
         router.get('', async (req, res) => {
             try {
+                const { version: targetVersion } = req.query;
                 const commonWhere = {
                     identifier: {
                         [Op.notIn]: EVENT_VEHICLES,
@@ -18,100 +20,134 @@ module.exports = {
                     }
                 };
 
-                const [countryStatsQuery, vehicleStatsQuery, totalPremiumVehicles, totalGeRequired, currentVersions, oldVersions, geCostByCountry] = await Promise.all([
-                    Vehicle.findAll({
-                        attributes: [
-                            'country',
-                            [fn('SUM', col('value')), 'total_value'],
-                            [fn('SUM', col('req_exp')), 'total_req_exp'],
-                        ],
-                        where: { ...commonWhere, is_premium: false, on_marketplace: false, is_pack: false },
-                        group: ['country']
-                    }),
-                    Vehicle.findAll({
-                        attributes: [
-                            'country',
-                            'vehicle_type',
-                            [fn('COUNT', col('identifier')), 'total_vehicles']
-                        ],
-                        where: commonWhere,
-                        group: ['country', 'vehicle_type']
-                    }),
-                    Vehicle.count({
-                        where: { ...commonWhere, is_premium: true }
-                    }),
-                    Vehicle.sum('ge_cost', {
-                        where: { ...commonWhere, is_premium: true, is_pack: false, on_marketplace: false }
-                    }),
-                    Vehicle.findAll({
-                        attributes: ['version'],
-                        group: ['version']
-                    }),
-                    VehicleOld.findAll({
-                        attributes: ['version'],
-                        group: ['version']
-                    }),
-                    Vehicle.findAll({
-                        attributes: [
-                            'country',
-                            [fn('SUM', col('ge_cost')), 'total_ge_cost']
-                        ],
-                        where: { ...commonWhere, is_premium: true, is_pack: false, on_marketplace: false },
-                        group: ['country']
-                    })
+                const [currentVersions, oldVersions] = await Promise.all([
+                    Vehicle.findAll({ attributes: ['version'], group: ['version'] }),
+                    VehicleOld.findAll({ attributes: ['version'], group: ['version'] })
                 ]);
-                
-                const geCostMap = geCostByCountry.reduce((acc, item) => {
-                    acc[item.country] = item.dataValues.total_ge_cost;
-                    return acc;
-                }, {});
-                
-                const vehicleTypeGroup = vehicleStatsQuery.reduce((acc, item) => {
-                    if (!acc[item.country]) {
-                        acc[item.country] = {
+
+                const allVersions = [...new Set([
+                    ...currentVersions.map(v => v.version),
+                    ...oldVersions.map(v => v.version)
+                ])].sort((a, b) => a.localeCompare(b));
+
+
+                let vehicleList = [];
+                if (targetVersion) {
+                    //version <= targetVersion
+                    const versionWhere = {
+                        ...commonWhere,
+                        version: { [Op.lte]: targetVersion }
+                    };
+
+                    const [currentVehicles, oldVehicles] = await Promise.all([
+                        Vehicle.findAll({ where: versionWhere, raw: true }),
+                        VehicleOld.findAll({ where: versionWhere, raw: true })
+                    ]);
+
+                    const combined = [...currentVehicles, ...oldVehicles];
+                    combined.sort((a, b) => a.version.localeCompare(b.version));
+
+                    const vehicleMap = {};
+                    combined.forEach(v => {
+                        vehicleMap[v.identifier] = v;
+                    });
+
+                    vehicleList = Object.values(vehicleMap);
+                } else {
+                    //otherwise get stats for latest version
+                    vehicleList = await Vehicle.findAll({
+                        where: commonWhere,
+                        raw: true
+                    });
+                }
+
+                const stats = {
+                    total_techtree_vehicles: 0,
+                    total_premium_vehicles: 0,
+                    total_sl_required: 0,
+                    total_rp_required: 0,
+                    total_ge_required: 0,
+                    categories: {},
+                    countries: {}
+                };
+
+                vehicleList.forEach(v => {
+                    const isPremium = v.is_premium;
+                    const isPack = v.is_pack;
+                    const onMarket = v.on_marketplace;
+                    const country = v.country;
+                    const type = v.vehicle_type;
+
+                    if (!stats.countries[country]) {
+                        stats.countries[country] = {
+                            country: country,
+                            total_value: 0,
+                            total_req_exp: 0,
+                            total_ge_cost: 0,
                             total_vehicles: 0,
                             vehicle_types: {}
                         };
                     }
-                    acc[item.country].total_vehicles += parseInt(item.dataValues.total_vehicles);
-                    acc[item.country].vehicle_types[item.vehicle_type] = parseInt(item.dataValues.total_vehicles);
-                    return acc;
-                }, {});
-                
-                const countryStats = countryStatsQuery.reduce((accumulator, item) => {
-                    accumulator.push({
-                        country: item.country,
-                        total_value: parseInt(item.dataValues.total_value),
-                        total_req_exp: parseInt(item.dataValues.total_req_exp),
-                        total_ge_cost: parseInt(geCostMap[item.country]) || 0,
-                        total_vehicles: vehicleTypeGroup[item.country] ? parseInt(vehicleTypeGroup[item.country].total_vehicles) : 0,
-                        vehicle_types: vehicleTypeGroup[item.country] ? vehicleTypeGroup[item.country].vehicle_types : {}
-                        
-                    });
-                    return accumulator;
-                }, []);
+                    const cStat = stats.countries[country];
 
-                const vehicleStats = {
-                    total_playable_vehicles: Object.values(countryStats).reduce((acc, country) => acc + parseInt(country.total_vehicles), 0),
-                    total_premium_vehicles: totalPremiumVehicles,
-                    total_sl_required: Object.values(countryStats).reduce((acc, country) => acc + parseInt(country.total_value), 0),
-                    total_rp_required: Object.values(countryStats).reduce((acc, country) => acc + parseInt(country.total_req_exp), 0),
-                    total_ge_required: totalGeRequired,
-                    categories: Object.values(countryStats).reduce((accumulator, country) => {
-                        Object.entries(country.vehicle_types).forEach(([vehicleType, count]) => {
-                            accumulator[vehicleType] = (accumulator[vehicleType] || 0) + count;
-                        });
-                        return accumulator;
-                    }, {}),
-                    countries: countryStats,
-                    versions: [...new Set([...currentVersions.map(v => v.version), ...oldVersions.map(v => v.version)])].sort((a, b) => a.localeCompare(b))
+                    if (!cStat.vehicle_types[type]) {
+                        cStat.vehicle_types[type] = {
+                            count: 0,
+                            total_value: 0,
+                            total_req_exp: 0,
+                            total_ge_cost: 0
+                        };
+                    }
+                    const typeStat = cStat.vehicle_types[type];
+
+                    cStat.total_vehicles++;
+                    typeStat.count++;
+
+                    stats.categories[type] = (stats.categories[type] || 0) + 1;
+
+                    //non-premium / non-market / non-pack => tech tree vehicles
+                    if (!isPremium && !onMarket && !isPack) {
+                        const val = parseInt(v.value) || 0;
+                        const exp = parseInt(v.req_exp) || 0;
+
+                        stats.total_techtree_vehicles++;
+                        cStat.total_value += val;
+                        cStat.total_req_exp += exp;
+
+                        typeStat.total_value += val;
+                        typeStat.total_req_exp += exp;
+
+                        stats.total_sl_required += val;
+                        stats.total_rp_required += exp;
+                    }
+
+                    // premium only (market and packs not considered)
+                    if (isPremium) {
+                        stats.total_premium_vehicles++;
+
+                        if (!isPack && !onMarket) {
+                            const ge = parseInt(v.ge_cost) || 0;
+                            cStat.total_ge_cost += ge;
+                            typeStat.total_ge_cost += ge;
+                            stats.total_ge_required += ge;
+                        }
+                    }
+                });
+
+                const responseData = {
+                    ...stats,
+                    countries: Object.values(stats.countries),
+                    versions: allVersions
                 };
 
-                res.status(200).json(vehicleStats);
+                res.status(200).json(responseData);
+
             } catch (err) {
+                console.error(err);
                 res.status(500).json({ error: err.message });
             }
         });
+
         return router;
     }
 };
