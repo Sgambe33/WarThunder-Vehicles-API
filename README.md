@@ -9,8 +9,11 @@ The War Thunder Vehicles API provides comprehensive data retrieval for all in-ga
 
 Explore the full documentation [here](http://wtvehiclesapi.sgambe.serv00.net/docs).
 
+### Additional pages
 
-A [new page](https://wtvehiclesapi.sgambe.serv00.net/differences) has been added. It allows to view differences across game versions of the same vehicle. It's ugly I know. If you are a good web developer and willing to improve it, I'll accept your PR.
+- Vehicle version comparison: [here](https://wtvehiclesapi.sgambe.serv00.net/differences)
+
+- Statistics viewer: [here](https://wtvehiclesapi.sgambe.serv00.net/dashboard)
 
 ## Features
 - Localization for:

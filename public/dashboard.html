@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>War Thunder Vehicle Database Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            color: #b8c6db;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-container h2 {
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            color: #fff;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .country-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .country-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .country-header:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .country-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .country-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .country-stat {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .country-stat label {
+            display: block;
+            font-size: 0.85em;
+            color: #b8c6db;
+            margin-bottom: 5px;
+        }
+
+        .country-stat .value {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .country-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .country-content.expanded {
+            max-height: 2000px;
+            transition: max-height 0.5s ease-in;
+        }
+
+        .toggle-arrow {
+            transition: transform 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .toggle-arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .vehicle-types {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .vehicle-types h3 {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: #b8c6db;
+        }
+
+        .type-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .type-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .type-name {
+            font-size: 0.9em;
+            color: #fff;
+        }
+
+        .type-count {
+            font-weight: bold;
+            color: #4BC0C0;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>War Thunder Vehicle API Stats</h1>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Tech Tree Vehicles</h3>
+                <div class="value" id="totalVehicles">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Premium Vehicles</h3>
+                <div class="value" id="totalPremium">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total SL Required</h3>
+                <div class="value" id="totalSL">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total RP Required</h3>
+                <div class="value" id="totalRP">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total GE Required</h3>
+                <div class="value" id="totalGE">0</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h2>Vehicle Categories Distribution</h2>
+                <div class="chart-wrapper">
+                    <canvas id="categoriesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2>Countries by Total Vehicles</h2>
+                <div class="chart-wrapper">
+                    <canvas id="countriesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2>SL Required by Country</h2>
+                <div class="chart-wrapper">
+                    <canvas id="slByCountryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2>RP Required by Country</h2>
+                <div class="chart-wrapper">
+                    <canvas id="rpByCountryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2>GE Cost by Country</h2>
+                <div class="chart-wrapper">
+                    <canvas id="geByCountryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2>Top Vehicle Types</h2>
+                <div class="chart-wrapper">
+                    <canvas id="topVehiclesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin: 30px 0 20px 0; font-size: 2em;">Country Details</h2>
+        <div id="countriesContainer"></div>
+    </div>
+
+    <script>
+        // Helper function to format numbers
+        function formatNumber(num) {
+            return num.toLocaleString();
+        }
+
+        async function fetchData() {
+            const response = await fetch("https://www.wtvehiclesapi.sgambe.serv00.net/api/vehicles/stats");
+            const data = await response.json();
+            return data;
+        }
+
+        // Initialize dashboard
+        fetchData().then(data => {
+            // Update stats cards
+            document.getElementById('totalVehicles').textContent = formatNumber(data.total_techtree_vehicles);
+            document.getElementById('totalPremium').textContent = formatNumber(data.total_premium_vehicles);
+            document.getElementById('totalSL').textContent = formatNumber(data.total_sl_required);
+            document.getElementById('totalRP').textContent = formatNumber(data.total_rp_required);
+            document.getElementById('totalGE').textContent = formatNumber(data.total_ge_required);
+
+            // Chart colors
+            const chartColors = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384',
+                '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'
+            ];
+
+            // Categories Chart
+            const categoriesLabels = Object.keys(data.categories).map(cat =>
+                cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+            );
+            const categoriesData = Object.values(data.categories);
+
+            new Chart(document.getElementById('categoriesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: categoriesLabels,
+                    datasets: [{
+                        data: categoriesData,
+                        backgroundColor: chartColors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#fff',
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Countries by Vehicles Chart
+            const countryNames = data.countries.map(c => c.country.toUpperCase());
+            const countryVehicles = data.countries.map(c => c.total_vehicles);
+
+            new Chart(document.getElementById('countriesChart'), {
+                type: 'bar',
+                data: {
+                    labels: countryNames,
+                    datasets: [{
+                        label: 'Total Vehicles',
+                        data: countryVehicles,
+                        backgroundColor: '#36A2EB'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // SL by Country Chart
+            const countrySL = data.countries.map(c => c.total_value);
+
+            new Chart(document.getElementById('slByCountryChart'), {
+                type: 'bar',
+                data: {
+                    labels: countryNames,
+                    datasets: [{
+                        label: 'Total SL Required',
+                        data: countrySL,
+                        backgroundColor: '#FFCE56'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // RP by Country Chart
+            const countryRP = data.countries.map(c => c.total_req_exp);
+
+            new Chart(document.getElementById('rpByCountryChart'), {
+                type: 'bar',
+                data: {
+                    labels: countryNames,
+                    datasets: [{
+                        label: 'Total RP Required',
+                        data: countryRP,
+                        backgroundColor: '#4BC0C0'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            const countryGE = data.countries.map(c => c.total_ge_cost);
+            new Chart(document.getElementById('geByCountryChart'), {
+                type: 'bar',
+                data: {
+                    labels: countryNames,
+                    datasets: [{
+                        label: 'Total GE Cost',
+                        data: countryGE,
+                        backgroundColor: '#FF9F40'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Top Vehicle Types Chart
+            const sortedCategories = Object.entries(data.categories)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            new Chart(document.getElementById('topVehiclesChart'), {
+                type: 'bar',
+                data: {
+                    labels: sortedCategories.map(c => c[0].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())),
+                    datasets: [{
+                        label: 'Vehicle Count',
+                        data: sortedCategories.map(c => c[1]),
+                        backgroundColor: '#9966FF'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            beginAtZero: true,
+                            ticks: { color: '#fff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+
+
+            // Create country detail sections
+            const countriesContainer = document.getElementById('countriesContainer');
+
+            data.countries.forEach(country => {
+                const section = document.createElement('div');
+                section.className = 'country-section';
+
+                const header = document.createElement('div');
+                header.className = 'country-header';
+                header.innerHTML = `
+                <div class="country-name">${country.country.toUpperCase()}</div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span>${formatNumber(country.total_vehicles)} vehicles</span>
+                    <span class="toggle-arrow">▼</span>
+                </div>
+            `;
+
+                const content = document.createElement('div');
+                content.className = 'country-content';
+
+                const stats = document.createElement('div');
+                stats.className = 'country-stats';
+                stats.innerHTML = `
+                <div class="country-stat">
+                    <label>Total SL Required</label>
+                    <div class="value">${formatNumber(country.total_value)}</div>
+                </div>
+                <div class="country-stat">
+                    <label>Total RP Required</label>
+                    <div class="value">${formatNumber(country.total_req_exp)}</div>
+                </div>
+                <div class="country-stat">
+                    <label>Total GE Cost</label>
+                    <div class="value">${formatNumber(country.total_ge_cost)}</div>
+                </div>
+                <div class="country-stat">
+                    <label>Total Vehicles</label>
+                    <div class="value">${formatNumber(country.total_vehicles)}</div>
+                </div>
+            `;
+
+                const vehicleTypes = document.createElement('div');
+                vehicleTypes.className = 'vehicle-types';
+                
+                // Generate vehicle type list from existing data
+                let typesHTML = '';
+                if (country.vehicle_types && Object.keys(country.vehicle_types).length > 0) {
+                    const sortedTypes = Object.entries(country.vehicle_types)
+                        .sort((a, b) => b[1].count - a[1].count);
+                    
+                    typesHTML = sortedTypes.map(([type, data]) => `
+                        <div class="type-item">
+                            <span class="type-name">${type.replace(/_/g, ' ').toUpperCase()}</span>
+                            <span class="type-count">${data.count}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    typesHTML = '<div style="grid-column: 1/-1; text-align: center; color: #b8c6db;">No data available</div>';
+                }
+                
+                vehicleTypes.innerHTML = `
+                    <h3>Vehicle Distribution by Type</h3>
+                    <div class="type-list">${typesHTML}</div>
+                `;
+
+                content.appendChild(stats);
+                content.appendChild(vehicleTypes);
+
+                // Toggle functionality
+                header.addEventListener('click', () => {
+                    const arrow = header.querySelector('.toggle-arrow');
+                    const isExpanded = content.classList.contains('expanded');
+                    
+                    if (!isExpanded) {
+                        content.classList.add('expanded');
+                        arrow.classList.add('expanded');
+                    } else {
+                        content.classList.remove('expanded');
+                        arrow.classList.remove('expanded');
+                    }
+                });
+
+                section.appendChild(header);
+                section.appendChild(content);
+                countriesContainer.appendChild(section);
+            });
+        });
+    </script>
+</body>
+
+</html>
