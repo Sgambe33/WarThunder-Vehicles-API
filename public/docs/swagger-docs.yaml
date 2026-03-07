@@ -1,7 +1,7 @@
 openapi: 3.0.0
 servers:
 - description: Main Server
-  url: "https://www.wtvehiclesapi.sgambe.serv00.net/api"
+  url: "https://wtvehiclesapi.duckdns.org/api"
 - description: Dev Server
   url: "http://localhost:3000/api"
 info:
