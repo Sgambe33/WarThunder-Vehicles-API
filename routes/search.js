@@ -11,16 +11,19 @@ module.exports = {
             try {
                 const { name } = req.params;
                 const queryResult = await Vehicle.findAll({
+                    attributes: ['identifier'],
+                    raw: true,
                     where: {
                         identifier: {
                             [Op.like]: `%${name.replace('-', '_')}%`,
                         },
                     },
                 });
-                res.status(queryResult.length === 0 ? 404 : 200).json(
-                    queryResult.length === 0
-                        ? { message: "No vehicles found" }
-                        : queryResult.map(doc => doc.dataValues.identifier)
+                const found = queryResult.length > 0;
+                res.status(found ? 200 : 404).json(
+                    found
+                        ? queryResult.map(doc => doc.identifier)
+                        : { message: "No vehicles found" }
                 );
             } catch (error) {
                 res.status(500).json({ message: error.message });

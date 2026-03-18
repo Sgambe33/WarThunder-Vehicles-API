@@ -1,8 +1,9 @@
-require('dotenv').config();
 const express = require('express');
 const { EVENT_VEHICLES } = require('../utils/constants');
 const { Vehicle, VehicleOld } = require('../models/models');
-const { Op, fn, col } = require('sequelize');
+const { Op } = require('sequelize');
+
+const STATS_ATTRIBUTES = ['identifier', 'version', 'is_premium', 'is_pack', 'on_marketplace', 'country', 'vehicle_type', 'value', 'req_exp', 'ge_cost'];
 
 
 module.exports = {
@@ -21,14 +22,14 @@ module.exports = {
                 };
 
                 const [currentVersions, oldVersions] = await Promise.all([
-                    Vehicle.findAll({ attributes: ['version'], group: ['version'] }),
-                    VehicleOld.findAll({ attributes: ['version'], group: ['version'] })
+                    Vehicle.findAll({ attributes: ['version'], group: ['version'],raw: true }),
+                    VehicleOld.findAll({ attributes: ['version'], group: ['version'],raw: true })
                 ]);
 
                 const allVersions = [...new Set([
                     ...currentVersions.map(v => v.version),
                     ...oldVersions.map(v => v.version)
-                ])].sort((a, b) => a.localeCompare(b));
+                ])].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
 
                 let vehicleList = [];
@@ -39,24 +40,34 @@ module.exports = {
                         version: { [Op.lte]: targetVersion }
                     };
 
-                    const [currentVehicles, oldVehicles] = await Promise.all([
-                        Vehicle.findAll({ where: versionWhere, raw: true }),
-                        VehicleOld.findAll({ where: versionWhere, raw: true })
-                    ]);
+                    const vehicleMap = new Map();
+                    const processVehicle = (v) => {
+                        const existing = vehicleMap.get(v.identifier);
+                        if (!existing || v.version.localeCompare(existing.version, undefined, { numeric: true }) > 0) {
+                            vehicleMap.set(v.identifier, v);
+                        }
+                    };
 
-                    const combined = [...currentVehicles, ...oldVehicles];
-                    combined.sort((a, b) => a.version.localeCompare(b.version));
-
-                    const vehicleMap = {};
-                    combined.forEach(v => {
-                        vehicleMap[v.identifier] = v;
+                    const currentVehicles = await Vehicle.findAll({
+                        where: versionWhere,
+                        attributes: STATS_ATTRIBUTES,
+                        raw: true
                     });
+                    currentVehicles.forEach(processVehicle);
 
-                    vehicleList = Object.values(vehicleMap);
+                    const oldVehicles = await VehicleOld.findAll({
+                        where: versionWhere,
+                        attributes: STATS_ATTRIBUTES,
+                        raw: true
+                    });
+                    oldVehicles.forEach(processVehicle);
+
+                    vehicleList = vehicleMap.values();
                 } else {
                     //otherwise get stats for latest version
                     vehicleList = await Vehicle.findAll({
                         where: commonWhere,
+                        attributes: STATS_ATTRIBUTES,
                         raw: true
                     });
                 }
@@ -71,7 +82,7 @@ module.exports = {
                     countries: {}
                 };
 
-                vehicleList.forEach(v => {
+                for (const v of vehicleList) {
                     const isPremium = v.is_premium;
                     const isPack = v.is_pack;
                     const onMarket = v.on_marketplace;
@@ -132,14 +143,13 @@ module.exports = {
                             stats.total_ge_required += ge;
                         }
                     }
-                });
+                }
 
                 const responseData = {
                     ...stats,
                     countries: Object.values(stats.countries),
                     versions: allVersions
                 };
-
                 res.status(200).json(responseData);
 
             } catch (err) {

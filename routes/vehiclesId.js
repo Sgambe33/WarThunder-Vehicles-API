@@ -1,13 +1,13 @@
 const express = require('express');
 const { Vehicle, VehicleOld } = require('../models/models');
 const { Op } = require("sequelize");
-const { appendImages, latestVersion } = require("../utils/utilFunctions");
+const { appendImages, latestVersion, deserializeVehicleJsonFields } = require("../utils/utilFunctions");
 const { VERSION_REGEX } = require("../utils/constants");
 
 const findVehicle = (model, id, version = null) => {
-    const where = { identifier: { [Op.like]: id } };
+    const where = { identifier: { [Op.eq]: id } };
     if (version) where.version = version;
-    return model.findOne({ where });
+    return model.findOne({ where, raw: true });
 };
 
 module.exports = {
@@ -40,19 +40,20 @@ module.exports = {
                         findVehicle(Vehicle, id),
                         VehicleOld.findAll({
                             attributes: ['version'],
-                            where: { identifier: { [Op.like]: id } }
+                            where: { identifier: { [Op.eq]: id } },
+                            raw: true
                         })
                     ]);
 
                     if (vehicle) {
                         result = vehicle;
                         const history = oldVersions.map(v => v.version);
-                        result.dataValues.versions = [...history, vehicle.version].sort();
+                        result.versions = [...history, vehicle.version].sort();
                     }
                 }
 
                 if (result) {
-                    result = appendImages(result, req);
+                    result = appendImages(deserializeVehicleJsonFields(result), req);
                     return res.status(200).json(result);
                 } else {
                     return res.status(404).json({ error: 'Vehicle not found' });

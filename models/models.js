@@ -1,4 +1,4 @@
-const {DataTypes} = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('../utils/db')
 
 const commonAttributes = {
@@ -47,16 +47,16 @@ const commonAttributes = {
     train3_cost_exp: {
         type: DataTypes.INTEGER, allowNull: false
     },
-    sl_mul_arcade:{
+    sl_mul_arcade: {
         type: DataTypes.FLOAT, allowNull: false
     },
-    sl_mul_realistic:{
+    sl_mul_realistic: {
         type: DataTypes.FLOAT, allowNull: false
     },
-    sl_mul_simulator:{
+    sl_mul_simulator: {
         type: DataTypes.FLOAT, allowNull: false
     },
-    exp_mul:{
+    exp_mul: {
         type: DataTypes.FLOAT, allowNull: false
     },
     repair_time_arcade: {
@@ -113,13 +113,13 @@ const commonAttributes = {
     modifications: {
         type: DataTypes.JSON, allowNull: true
     },
-    ir_devices:{
+    ir_devices: {
         type: DataTypes.JSON, allowNull: true
     },
-    thermal_devices:{
+    thermal_devices: {
         type: DataTypes.JSON, allowNull: true
     },
-    ballistic_computer:{
+    ballistic_computer: {
         type: DataTypes.JSON, allowNull: true
     },
     aerodynamics: {
