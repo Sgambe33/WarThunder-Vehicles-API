@@ -223,6 +223,13 @@
     <div class="container">
         <h1>War Thunder Vehicle API Stats</h1>
 
+        <div style="text-align: center; margin-bottom: 30px;">
+            <label for="versionSelect" style="font-size: 1.2em; margin-right: 10px;">Select Version:</label>
+            <select id="versionSelect" style="padding: 10px; font-size: 1.1em; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; backdrop-filter: blur(10px); cursor: pointer;">
+                <option value="" style="color: #000;">Latest</option>
+            </select>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Tech Tree Vehicles</h3>
@@ -300,14 +307,51 @@
             return num.toLocaleString();
         }
 
-        async function fetchData() {
-            const response = await fetch("https://wtvehiclesapi.duckdns.org/api/vehicles/stats");
-            const data = await response.json();
-            return data;
+        function compareVersions(a, b) {
+            return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
         }
 
-        // Initialize dashboard
-        fetchData().then(data => {
+        async function fetchData(targetVersion = '') {
+            const baseUrl = 'https://wtvehiclesapi.duckdns.org/api/vehicles/stats';
+            const url = targetVersion ? `${baseUrl}?version=${encodeURIComponent(targetVersion)}` : baseUrl;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch dashboard stats: ${response.status}`);
+            }
+
+            return response.json();
+        }
+
+        const chartInstances = {};
+        let versionsInitialized = false;
+
+        function destroyCharts() {
+            Object.keys(chartInstances).forEach(key => {
+                if (chartInstances[key]) {
+                    chartInstances[key].destroy();
+                }
+            });
+        }
+
+        function populateVersionDropdown(versions) {
+            const versionSelect = document.getElementById('versionSelect');
+            const sortedVersions = [...versions].sort((a, b) => compareVersions(b, a));
+
+            sortedVersions.forEach(version => {
+                const option = document.createElement('option');
+                option.value = version;
+                option.textContent = version;
+                option.style.color = '#000';
+                versionSelect.appendChild(option);
+            });
+
+            versionsInitialized = true;
+        }
+
+        function renderDashboard(data) {
+            destroyCharts();
+
             // Update stats cards
             document.getElementById('totalVehicles').textContent = formatNumber(data.total_techtree_vehicles);
             document.getElementById('totalPremium').textContent = formatNumber(data.total_premium_vehicles);
@@ -329,7 +373,7 @@
             );
             const categoriesData = Object.values(data.categories);
 
-            new Chart(document.getElementById('categoriesChart'), {
+            chartInstances.categories = new Chart(document.getElementById('categoriesChart'), {
                 type: 'doughnut',
                 data: {
                     labels: categoriesLabels,
@@ -357,7 +401,7 @@
             const countryNames = data.countries.map(c => c.country.toUpperCase());
             const countryVehicles = data.countries.map(c => c.total_vehicles);
 
-            new Chart(document.getElementById('countriesChart'), {
+            chartInstances.countries = new Chart(document.getElementById('countriesChart'), {
                 type: 'bar',
                 data: {
                     labels: countryNames,
@@ -392,7 +436,7 @@
             // SL by Country Chart
             const countrySL = data.countries.map(c => c.total_value);
 
-            new Chart(document.getElementById('slByCountryChart'), {
+            chartInstances.slByCountry = new Chart(document.getElementById('slByCountryChart'), {
                 type: 'bar',
                 data: {
                     labels: countryNames,
@@ -427,7 +471,7 @@
             // RP by Country Chart
             const countryRP = data.countries.map(c => c.total_req_exp);
 
-            new Chart(document.getElementById('rpByCountryChart'), {
+            chartInstances.rpByCountry = new Chart(document.getElementById('rpByCountryChart'), {
                 type: 'bar',
                 data: {
                     labels: countryNames,
@@ -460,7 +504,7 @@
             });
 
             const countryGE = data.countries.map(c => c.total_ge_cost);
-            new Chart(document.getElementById('geByCountryChart'), {
+            chartInstances.geByCountry = new Chart(document.getElementById('geByCountryChart'), {
                 type: 'bar',
                 data: {
                     labels: countryNames,
@@ -497,7 +541,7 @@
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 10);
 
-            new Chart(document.getElementById('topVehiclesChart'), {
+            chartInstances.topVehicles = new Chart(document.getElementById('topVehiclesChart'), {
                 type: 'bar',
                 data: {
                     labels: sortedCategories.map(c => c[0].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())),
@@ -534,6 +578,7 @@
 
             // Create country detail sections
             const countriesContainer = document.getElementById('countriesContainer');
+            countriesContainer.innerHTML = '';
 
             data.countries.forEach(country => {
                 const section = document.createElement('div');
@@ -575,13 +620,13 @@
 
                 const vehicleTypes = document.createElement('div');
                 vehicleTypes.className = 'vehicle-types';
-                
+
                 // Generate vehicle type list from existing data
                 let typesHTML = '';
                 if (country.vehicle_types && Object.keys(country.vehicle_types).length > 0) {
                     const sortedTypes = Object.entries(country.vehicle_types)
                         .sort((a, b) => b[1].count - a[1].count);
-                    
+
                     typesHTML = sortedTypes.map(([type, data]) => `
                         <div class="type-item">
                             <span class="type-name">${type.replace(/_/g, ' ').toUpperCase()}</span>
@@ -591,7 +636,7 @@
                 } else {
                     typesHTML = '<div style="grid-column: 1/-1; text-align: center; color: #b8c6db;">No data available</div>';
                 }
-                
+
                 vehicleTypes.innerHTML = `
                     <h3>Vehicle Distribution by Type</h3>
                     <div class="type-list">${typesHTML}</div>
@@ -604,7 +649,7 @@
                 header.addEventListener('click', () => {
                     const arrow = header.querySelector('.toggle-arrow');
                     const isExpanded = content.classList.contains('expanded');
-                    
+
                     if (!isExpanded) {
                         content.classList.add('expanded');
                         arrow.classList.add('expanded');
@@ -618,7 +663,31 @@
                 section.appendChild(content);
                 countriesContainer.appendChild(section);
             });
-        });
+        }
+
+        async function loadDashboardForSelection() {
+            const versionSelect = document.getElementById('versionSelect');
+
+            try {
+                versionSelect.disabled = true;
+                const data = await fetchData(versionSelect.value);
+                renderDashboard(data);
+
+                if (!versionsInitialized && Array.isArray(data.versions)) {
+                    populateVersionDropdown(data.versions);
+                }
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+            } finally {
+                versionSelect.disabled = false;
+            }
+        }
+
+        const versionSelect = document.getElementById('versionSelect');
+        versionSelect.addEventListener('change', loadDashboardForSelection);
+
+        // Initialize dashboard with latest data
+        loadDashboardForSelection();
     </script>
 </body>
 
