@@ -14,10 +14,9 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "sequelize": "^6.37.5",
     "express-rate-limit": "^8.1.0",
-    "sqlite3": "^5.1.7"
+    "sequelize": "^6.37.5",
+    "sqlite3": "^5.0.2"
   }
 }
