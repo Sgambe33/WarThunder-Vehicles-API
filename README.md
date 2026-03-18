@@ -9,13 +9,13 @@
 
 The War Thunder Vehicles API provides comprehensive data retrieval for all in-game vehicles, including hidden and event-specific vehicles. Access detailed information on vehicle performance, economic costs, armaments, and weapon presets. As the API is under active development, please note that some data may be subject to updates and corrections.
 
-Explore the full documentation [here](http://wtvehiclesapi.sgambe.serv00.net/docs).
+Explore the full documentation [here](https://wtvehiclesapi.duckdns.org/docs).
 
 ### Additional pages
 
-- Vehicle version comparison: [here](https://wtvehiclesapi.sgambe.serv00.net/differences)
+- Vehicle version comparison: [here](https://wtvehiclesapi.duckdns.org/differences.html)
 
-- Statistics viewer: [here](https://wtvehiclesapi.sgambe.serv00.net/dashboard)
+- Statistics viewer: [here](https://wtvehiclesapi.duckdns.org/dashboard.html)
 
 ## Features
 - Localization for:
