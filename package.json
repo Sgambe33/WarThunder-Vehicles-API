@@ -4,7 +4,7 @@
   "description": "API for WT Vehicles",
   "main": "app.js",
   "scripts": {
-    "serve": "nodemon app.js",
+    "dev": "nodemon app.js",
     "start": "node app.js"
   },
   "author": "Sgambe33",

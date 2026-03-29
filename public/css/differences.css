@@ -1,0 +1,297 @@
+:root {
+    --bg: #eef2f5;
+    --card: #ffffff;
+    --muted: #5b6577;
+    --accent: #1a6cff;
+    --accent-2: #20c997;
+    --success: #06b6a4;
+    --danger: #ef4444;
+    --ink: #0b1220;
+    --glass: rgba(255, 255, 255, 0.72);
+    --shadow: 0 12px 30px rgba(12, 23, 40, 0.08);
+}
+
+html,
+body {
+    height: 100%
+}
+
+body {
+    font-family: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 1.25rem;
+    background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(26, 108, 255, 0.12), transparent 60%),
+        radial-gradient(900px 520px at 90% 10%, rgba(32, 201, 151, 0.12), transparent 55%),
+        linear-gradient(180deg, var(--bg), #f7f9fb 120%);
+    color: var(--ink);
+}
+
+header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+header h1 {
+    font-family: "Space Grotesk", "Source Sans 3", sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.2px;
+    margin: 0
+}
+
+header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem
+}
+
+.topbar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap
+}
+
+.card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 0.9rem;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(12, 23, 40, 0.06);
+}
+
+form#compareForm {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    flex-wrap: wrap
+}
+
+form#compareForm .field {
+    min-width: 180px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 5px
+}
+
+label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 0.25rem
+}
+
+input,
+select {
+    width: 100%;
+    padding: 0.55rem 0.65rem;
+    border-radius: 10px;
+    border: 1px solid #e6e9ef;
+    background: #fdfdfd;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-size: 0.95rem;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: rgba(26, 108, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(26, 108, 255, 0.15);
+}
+
+button.primary {
+    background: linear-gradient(120deg, var(--accent), #2f7cff 55%, #3a86ff 100%);
+    color: white;
+    border: none;
+    padding: 0.55rem 1rem;
+    border-radius: 10px;
+    cursor: pointer
+}
+
+button.primary:hover {
+    filter: brightness(1.02);
+}
+
+button.ghost {
+    background: transparent;
+    border: 1px solid #dfe5ee;
+    padding: 0.45rem 0.75rem;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+button.ghost:hover {
+    border-color: #b9c5d6;
+    color: #2b3a52;
+}
+
+main.grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    /* desktop layout */
+    grid-template-rows: 1fr;
+    /* let section stretch */
+    gap: 1rem;
+    margin-top: 1rem;
+    min-height: calc(100vh - 160px);
+    /* adjust for header + topbar */
+}
+
+/* mobile / tablet: stack panels */
+@media (max-width: 900px) {
+    main.grid {
+        grid-template-columns: 1fr;
+        /* single column */
+        grid-auto-rows: min-content auto;
+        /* aside takes natural height, section fills rest */
+    }
+
+    #metaPanel {
+        order: 1;
+        /* meta panel on top */
+    }
+
+    main.grid>section {
+        order: 2;
+        overflow: auto;
+        /* allow scrolling of diff content */
+    }
+}
+
+/* smaller mobile tweaks */
+@media (max-width: 600px) {
+    body {
+        padding: 0.5rem;
+    }
+
+    form#compareForm {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    form#compareForm .field {
+        min-width: 100%;
+        flex: none;
+    }
+
+    .thumb {
+        height: 120px;
+    }
+
+    .controls-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* left panel */
+#metaPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem
+}
+
+.thumb {
+    width: 100%;
+    height: 160px;
+    background: linear-gradient(120deg, #f2f6fb, #eef2f6);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid rgba(12, 23, 40, 0.06);
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover
+}
+
+.meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem
+}
+
+.meta-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.92rem
+}
+
+.meta-item b {
+    color: #0b1220
+}
+
+/* center panel - diff */
+#comparison {
+    padding: 0.7rem;
+    overflow: auto;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.6), rgba(255, 255, 255, 0.9));
+    border-radius: 12px;
+    border: 1px solid rgba(12, 23, 40, 0.06);
+}
+
+#comparison h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1rem
+}
+
+.toolbar {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem
+}
+
+.toolbar .info {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-left: auto
+}
+
+/* small screens */
+@media(max-width:1100px) {
+    main.grid {
+        grid-template-columns: 1fr;
+    }
+
+    .jsonBox {
+        height: 240px
+    }
+}
+
+/* hide unchanged nodes when user toggles */
+.hide-unchanged .jsondiffpatch-unchanged,
+.hide-unchanged .unchanged {
+    display: none !important
+}
+
+/* subtle improvements to diff look */
+.jsondiffpatch-html .jsondiffpatch-value.jsondiffpatch-added {
+    background: linear-gradient(90deg, #e6f7ff, #f4fbff)
+}
+
+.jsondiffpatch-html .jsondiffpatch-value.jsondiffpatch-deleted {
+    background: linear-gradient(90deg, #fff1f0, #fff8f7)
+}
+
+.controls-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center
+}
+
+.topbar .field label {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
