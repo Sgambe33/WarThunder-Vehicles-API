@@ -8,3 +8,4 @@ testing.sqlite3
 *.sqlite3.bak
 .idea/
 *.png
+cache/
