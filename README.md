@@ -1,5 +1,5 @@
 # War Thunder Vehicles API
-
+[![Better Stack Badge](https://uptime.betterstack.com/status-badges/v2/monitor/2kp7l.svg)](https://uptime.betterstack.com/?utm_source=status_badge)
 <a href='https://ko-fi.com/E1E6RA850' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi4.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 >ℹ️ Due to issues with last hosting provider, the API has been moved to a new address: `https://wtvehiclesapi.duckdns.org/`
