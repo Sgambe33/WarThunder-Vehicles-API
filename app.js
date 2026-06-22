@@ -3,11 +3,15 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const { default: rateLimit, ipKeyGenerator } = require('express-rate-limit');
-
+const morgan = require('morgan');
+const { sequelize } = require('./utils/db');
 const app = express();
 app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '256kb' }));
+
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+app.use(morgan('combined', { stream: accessLogStream }));
 
 if (process.env.NODE_ENV !== 'production') {
     app.set('json spaces', 2);
@@ -16,7 +20,7 @@ if (process.env.NODE_ENV !== 'production') {
 const sharedLimiterOptions = {
     windowMs: 72 * 60 * 60 * 1000,
     max: 10000,
-    keyGenerator: (req) => req.headers.origin || req.headers.referer || ipKeyGenerator(req),
+    keyGenerator: (req) => req.ip || ipKeyGenerator(req),
     standardHeaders: true,
     legacyHeaders: false,
 };
@@ -39,13 +43,26 @@ fs.readdirSync(path.resolve(__dirname, 'routes')).forEach(file => {
     }
 });
 
-app.use('/assets', assetLimiter, express.static('assets'));
-app.use(express.static('public'));
+app.use('/assets', assetLimiter, express.static(path.join(__dirname, 'assets')));
+app.use(express.static(path.join(__dirname, 'public')));
 
+app.use((req, res) => {
+    res.status(404).json({
+        error: "Route not found",
+        at: new Date().toISOString(),
+        method: req.method,
+        hostname: req.hostname,
+        path: req.originalUrl,
+        query: req.query
+    });
+});
 
-app.use('/{*unrouted}', (req, res) => {
-    res.json({
-        at: new Date().toISOString(), method: req.method, hostname: req.hostname, query: req.query, params: req.params
+app.use((err, req, res, next) => {
+    console.error(`[Error Handler] ${err.stack}`);
+    res.status(err.status || 500).json({
+        error: process.env.NODE_ENV === 'production'
+            ? 'An unexpected server error occurred.'
+            : err.message
     });
 });
 
@@ -53,4 +70,20 @@ const PORT = 3000;
 
 app.listen(PORT, () => {
     console.log(`Server Started at http://localhost:${PORT}`);
+});
+
+process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing server');
+    server.close(async () => {
+        console.log('HTTP server closed');
+
+        try {
+            await sequelize.close();
+            console.log('Database connection closed.');
+        } catch (err) {
+            console.error('Error closing database:', err);
+        }
+
+        process.exit(0);
+    })
 });
