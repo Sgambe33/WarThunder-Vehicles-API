@@ -4,93 +4,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>War Thunder Vehicle Database Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>WT Vehicles — Intel Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
 
 <body>
-    <div class="container">
-        <h1>War Thunder Vehicle API Stats</h1>
 
-        <div style="text-align: center; margin-bottom: 30px;">
-            <label for="versionSelect" style="font-size: 1.2em; margin-right: 10px;">Select Version:</label>
-            <select id="versionSelect"
-                style="padding: 10px; font-size: 1.1em; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; backdrop-filter: blur(10px); cursor: pointer;">
-                <option value="" style="color: #000;">Latest</option>
+    <header class="hud-header">
+        <div class="hud-logo">WT<span>Vehicles</span> &mdash; Stats</div>
+        <div class="version-control">
+            <span class="version-label">Version</span>
+            <select id="versionSelect">
+                <option value="">Latest</option>
             </select>
+            <div class="status-dot" id="statusDot"></div>
         </div>
+    </header>
 
-        <div class="stats-grid">
+    <main class="main">
+        <div class="error-banner" id="errorBanner"></div>
+
+        <div class="section-label">Overview</div>
+        <div class="stat-grid" id="statGrid">
             <div class="stat-card">
-                <h3>Total Tech Tree Vehicles</h3>
-                <div class="value" id="totalVehicles">0</div>
+                <div class="stat-card-label">Tech Tree</div>
+                <div class="stat-card-value" id="s-techtree">—</div>
+                <div class="stat-card-sub">Research vehicles</div>
+            </div>
+            <div class="stat-card accent-red">
+                <div class="stat-card-label">Premium</div>
+                <div class="stat-card-value" id="s-premium">—</div>
+                <div class="stat-card-sub">GE purchasable</div>
+            </div>
+            <div class="stat-card accent-blue">
+                <div class="stat-card-label">Packs</div>
+                <div class="stat-card-value" id="s-pack">—</div>
+                <div class="stat-card-sub">Real-money bundles</div>
+            </div>
+            <div class="stat-card accent-purple">
+                <div class="stat-card-label">Marketplace</div>
+                <div class="stat-card-value" id="s-market">—</div>
+                <div class="stat-card-sub">Non-premium listings</div>
             </div>
             <div class="stat-card">
-                <h3>Total Premium Vehicles</h3>
-                <div class="value" id="totalPremium">0</div>
+                <div class="stat-card-label">Mkt. Premium</div>
+                <div class="stat-card-value" id="s-mktprem">—</div>
+                <div class="stat-card-sub">Premium marketplace</div>
             </div>
-            <div class="stat-card">
-                <h3>Total SL Required</h3>
-                <div class="value" id="totalSL">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total RP Required</h3>
-                <div class="value" id="totalRP">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total GE Required</h3>
-                <div class="value" id="totalGE">0</div>
-            </div>
-        </div>
-
-        <div class="charts-grid">
-            <div class="chart-container">
-                <h2>Vehicle Categories Distribution</h2>
-                <div class="chart-wrapper">
-                    <canvas id="categoriesChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-container">
-                <h2>Countries by Total Vehicles</h2>
-                <div class="chart-wrapper">
-                    <canvas id="countriesChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-container">
-                <h2>SL Required by Country</h2>
-                <div class="chart-wrapper">
-                    <canvas id="slByCountryChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-container">
-                <h2>RP Required by Country</h2>
-                <div class="chart-wrapper">
-                    <canvas id="rpByCountryChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-container">
-                <h2>GE Cost by Country</h2>
-                <div class="chart-wrapper">
-                    <canvas id="geByCountryChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-container">
-                <h2>Top Vehicle Types</h2>
-                <div class="chart-wrapper">
-                    <canvas id="topVehiclesChart"></canvas>
-                </div>
+            <div class="stat-card accent-teal">
+                <div class="stat-card-label">Squadron</div>
+                <div class="stat-card-value" id="s-squadron">—</div>
+                <div class="stat-card-sub">Squadron research</div>
             </div>
         </div>
 
-        <h2 style="margin: 30px 0 20px 0; font-size: 2em;">Country Details</h2>
-        <div id="countriesContainer"></div>
-    </div>
+        <div class="section-label">Economy</div>
+        <div class="stat-grid">
+            <div class="stat-card accent-steel">
+                <div class="stat-card-label">Total SL Required</div>
+                <div class="stat-card-value" id="s-sl">—</div>
+                <div class="stat-card-sub">Silver Lions to buy all TT</div>
+            </div>
+            <div class="stat-card accent-blue">
+                <div class="stat-card-label">Total RP Required</div>
+                <div class="stat-card-value" id="s-rp">—</div>
+                <div class="stat-card-sub">Research points for all TT</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Total GE Required</div>
+                <div class="stat-card-value" id="s-ge">—</div>
+                <div class="stat-card-sub">Golden Eagles for all premium</div>
+            </div>
+            <div class="stat-card accent-teal">
+                <div class="stat-card-label">Total SRP Required</div>
+                <div class="stat-card-value" id="s-srp">—</div>
+                <div class="stat-card-sub">Squadron RP for all SQ vehicles</div>
+            </div>
+        </div>
+
+        <div class="section-label">Vehicle Distribution</div>
+        <div class="charts-grid" style="margin-bottom:16px;">
+            <div class="chart-card">
+                <div class="chart-card-title">By Type</div>
+                <div class="chart-wrap"><canvas id="chartTypes"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-title">By Nation</div>
+                <div class="chart-wrap"><canvas id="chartNations"></canvas></div>
+            </div>
+        </div>
+
+        <div class="section-label">Economy by Nation</div>
+        <div class="charts-grid triple" style="margin-bottom:36px;">
+            <div class="chart-card">
+                <div class="chart-card-title">SL Required</div>
+                <div class="chart-wrap"><canvas id="chartSL"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-title">RP Required</div>
+                <div class="chart-wrap"><canvas id="chartRP"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-title">GE Cost (Premiums)</div>
+                <div class="chart-wrap"><canvas id="chartGE"></canvas></div>
+            </div>
+        </div>
+
+        <div class="section-label">Nation Intelligence</div>
+        <div class="country-list" id="countryList"></div>
+    </main>
 
     <script src="js/dashboard.js"></script>
 </body>

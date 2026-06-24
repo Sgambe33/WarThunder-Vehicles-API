@@ -1,386 +1,266 @@
-// Helper function to format numbers
-function formatNumber(num) {
-    return num.toLocaleString();
-}
-
-function compareVersions(a, b) {
-    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-}
-
-async function fetchData(targetVersion = '') {
-    const baseUrl = 'https://wtvehiclesapi.duckdns.org/api/vehicles/stats';
-    const url = targetVersion ? `${baseUrl}?version=${encodeURIComponent(targetVersion)}` : baseUrl;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch dashboard stats: ${response.status}`);
-    }
-
-    return response.json();
-}
-
-const chartInstances = {};
-let versionsInitialized = false;
-
-function destroyCharts() {
-    Object.keys(chartInstances).forEach(key => {
-        if (chartInstances[key]) {
-            chartInstances[key].destroy();
+/* ─────────────────────────────────────────────
+           Helpers
+        ───────────────────────────────────────────── */
+        function fmt(n) {
+            if (n === undefined || n === null) return '—';
+            if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+            if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+            return n.toLocaleString();
         }
-    });
-}
+        function fmtFull(n) { return (n || 0).toLocaleString(); }
+        function compareVersions(a, b) {
+            return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+        }
 
-function populateVersionDropdown(versions) {
-    const versionSelect = document.getElementById('versionSelect');
-    const sortedVersions = [...versions].sort((a, b) => compareVersions(b, a));
+        /* ─────────────────────────────────────────────
+           Chart defaults
+        ───────────────────────────────────────────── */
+        Chart.defaults.color = '#8b949e';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.font.size = 11;
 
-    sortedVersions.forEach(version => {
-        const option = document.createElement('option');
-        option.value = version;
-        option.textContent = version;
-        option.style.color = '#000';
-        versionSelect.appendChild(option);
-    });
+        const AMBER = '#e6a817';
+        const PALETTE = ['#e6a817', '#58a6ff', '#3fb950', '#da3633', '#bc8cff', '#39d353', '#f78166', '#56d364', '#79c0ff', '#d2a8ff', '#ffa657', '#ff7b72'];
 
-    versionsInitialized = true;
-}
+        const gridOpts = {
+            color: 'rgba(42,48,64,0.8)',
+        };
+        const tickOpts = { color: '#8b949e' };
 
-function renderDashboard(data) {
-    destroyCharts();
+        function barOpts(horizontal = false) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: horizontal ? 'y' : 'x',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: gridOpts, ticks: { ...tickOpts, maxRotation: 35 }, border: { color: '#2a3040' } },
+                    y: { grid: gridOpts, ticks: tickOpts, border: { color: '#2a3040' } }
+                }
+            };
+        }
 
-    // Update stats cards
-    document.getElementById('totalVehicles').textContent = formatNumber(data.total_techtree_vehicles);
-    document.getElementById('totalPremium').textContent = formatNumber(data.total_premium_vehicles);
-    document.getElementById('totalSL').textContent = formatNumber(data.total_sl_required);
-    document.getElementById('totalRP').textContent = formatNumber(data.total_rp_required);
-    document.getElementById('totalGE').textContent = formatNumber(data.total_ge_required);
+        const chartInstances = {};
+        function destroyCharts() {
+            Object.values(chartInstances).forEach(c => c?.destroy());
+            Object.keys(chartInstances).forEach(k => delete chartInstances[k]);
+        }
 
-    // Chart colors
-    const chartColors = [
-        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-        '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384',
-        '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
-        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'
-    ];
+        /* ─────────────────────────────────────────────
+           Counter animation
+        ───────────────────────────────────────────── */
+        function animateCounter(el, target, formatter = fmtFull, duration = 600) {
+            const start = performance.now();
+            el.classList.add('counting');
+            const step = (now) => {
+                const t = Math.min((now - start) / duration, 1);
+                const ease = 1 - Math.pow(1 - t, 3);
+                el.textContent = formatter(Math.round(ease * target));
+                if (t < 1) requestAnimationFrame(step);
+                else { el.textContent = formatter(target); el.classList.remove('counting'); }
+            };
+            requestAnimationFrame(step);
+        }
 
-    // Categories Chart
-    const categoriesLabels = Object.keys(data.categories).map(cat =>
-        cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-    );
-    const categoriesData = Object.values(data.categories);
+        /* ─────────────────────────────────────────────
+           Fetch
+        ───────────────────────────────────────────── */
+        async function fetchData(version = '') {
+            const base = 'http://localhost:3000/api/vehicles/stats';
+            const url = version ? `${base}?version=${encodeURIComponent(version)}` : base;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        }
 
-    chartInstances.categories = new Chart(document.getElementById('categoriesChart'), {
-        type: 'doughnut',
-        data: {
-            labels: categoriesLabels,
-            datasets: [{
-                data: categoriesData,
-                backgroundColor: chartColors
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        color: '#fff',
-                        font: { size: 11 }
+        /* ─────────────────────────────────────────────
+           Render
+        ───────────────────────────────────────────── */
+        let versionsLoaded = false;
+
+        function renderStats(data) {
+            const pairs = [
+                ['s-techtree', data.total_techtree_vehicles],
+                ['s-premium', data.total_premium_vehicles],
+                ['s-pack', data.total_pack_vehicles],
+                ['s-market', data.total_marketplace_vehicles],
+                ['s-mktprem', data.total_marketplace_premium_vehicles],
+                ['s-squadron', data.total_squadron_vehicles],
+                ['s-sl', data.total_sl_required],
+                ['s-rp', data.total_rp_required],
+                ['s-ge', data.total_ge_required],
+                ['s-srp', data.total_srp_required]
+            ];
+            pairs.forEach(([id, val]) => {
+                const el = document.getElementById(id);
+                if (el) animateCounter(el, val || 0, fmt);
+            });
+        }
+
+        function renderCharts(data) {
+            destroyCharts();
+
+            // Types doughnut
+            const typeEntries = Object.entries(data.categories).sort((a, b) => b[1] - a[1]);
+            chartInstances.types = new Chart(document.getElementById('chartTypes'), {
+                type: 'doughnut',
+                data: {
+                    labels: typeEntries.map(([k]) => k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())),
+                    datasets: [{ data: typeEntries.map(([, v]) => v), backgroundColor: PALETTE, borderWidth: 0, hoverOffset: 6 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '62%',
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#8b949e', boxWidth: 10, padding: 10, font: { size: 10 } } }
                     }
                 }
-            }
-        }
-    });
+            });
 
-    // Countries by Vehicles Chart
-    const countryNames = data.countries.map(c => c.country.toUpperCase());
-    const countryVehicles = data.countries.map(c => c.total_vehicles);
+            // Nations bar
+            const nations = [...data.countries].sort((a, b) => b.total_vehicles - a.total_vehicles);
+            const natLabels = nations.map(c => c.country.toUpperCase());
 
-    chartInstances.countries = new Chart(document.getElementById('countriesChart'), {
-        type: 'bar',
-        data: {
-            labels: countryNames,
-            datasets: [{
-                label: 'Total Vehicles',
-                data: countryVehicles,
-                backgroundColor: '#36A2EB'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: { color: '#fff' }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+            chartInstances.nations = new Chart(document.getElementById('chartNations'), {
+                type: 'bar',
+                data: {
+                    labels: natLabels,
+                    datasets: [{ data: nations.map(c => c.total_vehicles), backgroundColor: AMBER, borderRadius: 2 }]
                 },
-                x: {
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
-                }
-            }
-        }
-    });
+                options: barOpts()
+            });
 
-    // SL by Country Chart
-    const countrySL = data.countries.map(c => c.total_value);
-
-    chartInstances.slByCountry = new Chart(document.getElementById('slByCountryChart'), {
-        type: 'bar',
-        data: {
-            labels: countryNames,
-            datasets: [{
-                label: 'Total SL Required',
-                data: countrySL,
-                backgroundColor: '#FFCE56'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: { color: '#fff' }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+            chartInstances.sl = new Chart(document.getElementById('chartSL'), {
+                type: 'bar',
+                data: {
+                    labels: natLabels,
+                    datasets: [{ data: nations.map(c => c.total_value), backgroundColor: '#58a6ff', borderRadius: 2 }]
                 },
-                x: {
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
-                }
-            }
-        }
-    });
+                options: barOpts()
+            });
 
-    // RP by Country Chart
-    const countryRP = data.countries.map(c => c.total_req_exp);
-
-    chartInstances.rpByCountry = new Chart(document.getElementById('rpByCountryChart'), {
-        type: 'bar',
-        data: {
-            labels: countryNames,
-            datasets: [{
-                label: 'Total RP Required',
-                data: countryRP,
-                backgroundColor: '#4BC0C0'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: { color: '#fff' }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+            chartInstances.rp = new Chart(document.getElementById('chartRP'), {
+                type: 'bar',
+                data: {
+                    labels: natLabels,
+                    datasets: [{ data: nations.map(c => c.total_req_exp), backgroundColor: '#3fb950', borderRadius: 2 }]
                 },
-                x: {
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
-                }
-            }
-        }
-    });
+                options: barOpts()
+            });
 
-    const countryGE = data.countries.map(c => c.total_ge_cost);
-    chartInstances.geByCountry = new Chart(document.getElementById('geByCountryChart'), {
-        type: 'bar',
-        data: {
-            labels: countryNames,
-            datasets: [{
-                label: 'Total GE Cost',
-                data: countryGE,
-                backgroundColor: '#FF9F40'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: { color: '#fff' }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+            chartInstances.ge = new Chart(document.getElementById('chartGE'), {
+                type: 'bar',
+                data: {
+                    labels: natLabels,
+                    datasets: [{ data: nations.map(c => c.total_ge_cost), backgroundColor: '#da3633', borderRadius: 2 }]
                 },
-                x: {
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
-                }
+                options: barOpts()
+            });
+        }
+
+        function renderCountries(data) {
+            const list = document.getElementById('countryList');
+            list.innerHTML = '';
+
+            const sorted = [...data.countries].sort((a, b) => b.total_vehicles - a.total_vehicles);
+
+            sorted.forEach(country => {
+                const row = document.createElement('div');
+                row.className = 'country-row';
+
+                const sortedTypes = Object.entries(country.vehicle_types || {})
+                    .sort((a, b) => b[1].count - a[1].count);
+
+                row.innerHTML = `
+      <button class="country-toggle" aria-expanded="false">
+        <div class="country-flag-placeholder">${country.country.slice(0, 3).toUpperCase()}</div>
+        <span class="country-name-text">${country.country}</span>
+        <div class="country-summary">
+          <span class="country-pill"><strong>${fmtFull(country.total_vehicles)}</strong> vehicles</span>
+          <span class="country-pill"><strong>${fmt(country.total_value)}</strong> SL</span>
+          <span class="country-pill"><strong>${fmt(country.total_req_exp)}</strong> RP</span>
+          <span class="country-pill"><strong>${fmt(country.total_ge_cost)}</strong> GE</span>
+        </div>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="country-detail">
+        <div class="detail-stats">
+          <div class="detail-stat">
+            <div class="detail-stat-label">Total Vehicles</div>
+            <div class="detail-stat-value">${fmtFull(country.total_vehicles)}</div>
+          </div>
+          <div class="detail-stat">
+            <div class="detail-stat-label">SL Required</div>
+            <div class="detail-stat-value">${fmt(country.total_value)}</div>
+          </div>
+          <div class="detail-stat">
+            <div class="detail-stat-label">RP Required</div>
+            <div class="detail-stat-value">${fmt(country.total_req_exp)}</div>
+          </div>
+          <div class="detail-stat">
+            <div class="detail-stat-label">GE Cost</div>
+            <div class="detail-stat-value">${fmt(country.total_ge_cost)}</div>
+          </div>
+        </div>
+        <div class="type-grid">
+          ${sortedTypes.map(([type, d]) => `
+            <div class="type-row">
+              <span class="type-name-text">${type.replace(/_/g, ' ')}</span>
+              <span class="type-count-badge">${d.count}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+                row.querySelector('.country-toggle').addEventListener('click', () => {
+                    const open = row.classList.toggle('open');
+                    row.querySelector('.country-toggle').setAttribute('aria-expanded', open);
+                });
+
+                list.appendChild(row);
+            });
+        }
+
+        function populateVersions(versions) {
+            if (versionsLoaded) return;
+            const sel = document.getElementById('versionSelect');
+            [...versions].sort((a, b) => compareVersions(b, a)).forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v; opt.textContent = v;
+                sel.appendChild(opt);
+            });
+            versionsLoaded = true;
+        }
+
+        /* ─────────────────────────────────────────────
+           Load
+        ───────────────────────────────────────────── */
+        async function load() {
+            const sel = document.getElementById('versionSelect');
+            const dot = document.getElementById('statusDot');
+            const err = document.getElementById('errorBanner');
+
+            sel.disabled = true;
+            dot.className = 'status-dot loading';
+            err.classList.remove('visible');
+
+            try {
+                const data = await fetchData(sel.value);
+                renderStats(data);
+                renderCharts(data);
+                renderCountries(data);
+                if (Array.isArray(data.versions)) populateVersions(data.versions);
+                dot.className = 'status-dot';
+            } catch (e) {
+                err.textContent = `Failed to load data: ${e.message}`;
+                err.classList.add('visible');
+                dot.className = 'status-dot';
+                dot.style.background = 'var(--red)';
+                dot.style.boxShadow = '0 0 6px var(--red)';
+            } finally {
+                sel.disabled = false;
             }
         }
-    });
 
-    // Top Vehicle Types Chart
-    const sortedCategories = Object.entries(data.categories)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
-
-    chartInstances.topVehicles = new Chart(document.getElementById('topVehiclesChart'), {
-        type: 'bar',
-        data: {
-            labels: sortedCategories.map(c => c[0].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())),
-            datasets: [{
-                label: 'Vehicle Count',
-                data: sortedCategories.map(c => c[1]),
-                backgroundColor: '#9966FF'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y',
-            plugins: {
-                legend: {
-                    labels: { color: '#fff' }
-                }
-            },
-            scales: {
-                y: {
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
-                },
-                x: {
-                    beginAtZero: true,
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
-                }
-            }
-        }
-    });
-
-
-
-    // Create country detail sections
-    const countriesContainer = document.getElementById('countriesContainer');
-    countriesContainer.innerHTML = '';
-
-    data.countries.forEach(country => {
-        const section = document.createElement('div');
-        section.className = 'country-section';
-
-        const header = document.createElement('div');
-        header.className = 'country-header';
-        header.innerHTML = `
-                <div class="country-name">${country.country.toUpperCase()}</div>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <span>${formatNumber(country.total_vehicles)} vehicles</span>
-                    <span class="toggle-arrow">▼</span>
-                </div>
-            `;
-
-        const content = document.createElement('div');
-        content.className = 'country-content';
-
-        const stats = document.createElement('div');
-        stats.className = 'country-stats';
-        stats.innerHTML = `
-                <div class="country-stat">
-                    <label>Total SL Required</label>
-                    <div class="value">${formatNumber(country.total_value)}</div>
-                </div>
-                <div class="country-stat">
-                    <label>Total RP Required</label>
-                    <div class="value">${formatNumber(country.total_req_exp)}</div>
-                </div>
-                <div class="country-stat">
-                    <label>Total GE Cost</label>
-                    <div class="value">${formatNumber(country.total_ge_cost)}</div>
-                </div>
-                <div class="country-stat">
-                    <label>Total Vehicles</label>
-                    <div class="value">${formatNumber(country.total_vehicles)}</div>
-                </div>
-            `;
-
-        const vehicleTypes = document.createElement('div');
-        vehicleTypes.className = 'vehicle-types';
-
-        // Generate vehicle type list from existing data
-        let typesHTML = '';
-        if (country.vehicle_types && Object.keys(country.vehicle_types).length > 0) {
-            const sortedTypes = Object.entries(country.vehicle_types)
-                .sort((a, b) => b[1].count - a[1].count);
-
-            typesHTML = sortedTypes.map(([type, data]) => `
-                        <div class="type-item">
-                            <span class="type-name">${type.replace(/_/g, ' ').toUpperCase()}</span>
-                            <span class="type-count">${data.count}</span>
-                        </div>
-                    `).join('');
-        } else {
-            typesHTML = '<div style="grid-column: 1/-1; text-align: center; color: #b8c6db;">No data available</div>';
-        }
-
-        vehicleTypes.innerHTML = `
-                    <h3>Vehicle Distribution by Type</h3>
-                    <div class="type-list">${typesHTML}</div>
-                `;
-
-        content.appendChild(stats);
-        content.appendChild(vehicleTypes);
-
-        // Toggle functionality
-        header.addEventListener('click', () => {
-            const arrow = header.querySelector('.toggle-arrow');
-            const isExpanded = content.classList.contains('expanded');
-
-            if (!isExpanded) {
-                content.classList.add('expanded');
-                arrow.classList.add('expanded');
-            } else {
-                content.classList.remove('expanded');
-                arrow.classList.remove('expanded');
-            }
-        });
-
-        section.appendChild(header);
-        section.appendChild(content);
-        countriesContainer.appendChild(section);
-    });
-}
-
-async function loadDashboardForSelection() {
-    const versionSelect = document.getElementById('versionSelect');
-
-    try {
-        versionSelect.disabled = true;
-        const data = await fetchData(versionSelect.value);
-        renderDashboard(data);
-
-        if (!versionsInitialized && Array.isArray(data.versions)) {
-            populateVersionDropdown(data.versions);
-        }
-    } catch (error) {
-        console.error('Failed to load dashboard data:', error);
-    } finally {
-        versionSelect.disabled = false;
-    }
-}
-
-const versionSelect = document.getElementById('versionSelect');
-versionSelect.addEventListener('change', loadDashboardForSelection);
-
-// Initialize dashboard with latest data
-loadDashboardForSelection();
+        document.getElementById('versionSelect').addEventListener('change', load);
+        load();
