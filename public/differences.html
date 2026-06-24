@@ -4,79 +4,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vehicle Version Comparison</title>
-  <!-- jsondiffpatch -->
+  <title>WT Vehicles — Version Comparison</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsondiffpatch/public/formatters-styles/html.css">
+  <link rel="stylesheet" href="css/differences.css">
   <script src="https://cdn.jsdelivr.net/npm/jsondiffpatch/dist/jsondiffpatch.umd.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsondiffpatch/public/formatters/html.js"></script>
-  <link rel="stylesheet" href="css/differences.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
 </head>
-
 <body>
-  <header>
-    <div style="flex:1">
-      <h1>Vehicle Version Comparison</h1>
-    </div>
+
+  <header class="hud-header">
+    <div class="hud-logo">WT<span>Vehicles</span> &mdash; Version Diff</div>
   </header>
 
-  <section class="card topbar">
-    <form id="compareForm">
-      <div class="field">
-        <label for="identifier">Identifier</label>
-        <input id="identifier" placeholder="e.g. yak-7b" list="identifier-suggestions" autocomplete="off" required />
-        <datalist id="identifier-suggestions"></datalist>
-      </div>
+  <main class="main">
 
-      <div class="field">
-        <label for="version1">Version 1</label>
-        <select id="version1" required>
-          <option value="">--Please choose a version--</option>
-
-        </select>
-      </div>
-      <div class="field">
-        <label for="version2">Version 2</label>
-        <select id="version2" placeholder="choose version" required>
-          <option value="">--Please choose a version--</option>
-        </select>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:0.5rem">
-        <button type="submit" class="primary">Compare</button>
-      </div>
-
-    </form>
-  </section>
-
-  <main class="grid">
-    <aside id="metaPanel" class="card" aria-label="meta">
-      <div class="thumb" id="vehicleThumb"> <span style="color:var(--muted)">No image</span> </div>
-      <div class="meta-list card" style="padding:0.6rem">
-        <div class="meta-item"><span>Identifier</span><b id="meta-id">—</b></div>
-        <div class="meta-item"><span>Country</span><b id="meta-country">—</b></div>
-        <div class="meta-item"><span>Type</span><b id="meta-type">—</b></div>
-        <div class="meta-item"><span>BR (AB / RB / SB)</span><b id="meta-br">—</b></div>
-        <div class="meta-item"><span>Mass</span><b id="meta-mass">—</b></div>
-        <div class="meta-item"><span>Mods</span><b id="meta-mods">—</b></div>
-      </div>
-    </aside>
-
-    <section class="card" style="padding:0.6rem;display:flex;flex-direction:column;gap:0.6rem">
-      <div style="display:flex;align-items:center;gap:0.5rem">
-        <h2 id="diffTitle" style="margin:0;font-size:1rem">Differences</h2>
-        <div class="toolbar" style="margin-left:auto">
-          <div class="controls-row">
-            <label style="display:flex;align-items:center;gap:0.4rem;white-space:nowrap"><input type="checkbox"
-                id="detectMove" checked /> Detect moves</label>
-            <label style="display:flex;align-items:center;gap:0.4rem;white-space:nowrap"><input type="checkbox"
-                id="hideUnchanged" checked /> Hide unchanged</label>
-            <button id="btnDownload" class="ghost">Download delta</button>
-          </div>
+    <div>
+      <div class="section-label">Vehicle Selector</div>
+      <form class="search-bar" id="compareForm" onsubmit="return false;">
+        <div class="field" style="position:relative;">
+          <label for="identifier">Identifier</label>
+          <input id="identifier" placeholder="e.g. yak-7b" autocomplete="off" required spellcheck="false" />
+          <ul class="ac-dropdown" id="identifier-suggestions" role="listbox" aria-label="Identifier suggestions"></ul>
         </div>
-      </div>
+        <div class="field">
+          <label for="version1">Version A</label>
+          <select id="version1" required>
+            <option value="">— select version —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="version2">Version B</label>
+          <select id="version2" required>
+            <option value="">— select version —</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-compare" id="btnCompare">Compare</button>
+      </form>
+    </div>
 
-      <div id="comparison"><!-- diff render target --></div>
-    </section>
+    <div class="content-grid">
+
+      <aside class="meta-panel" aria-label="Vehicle metadata">
+        <div class="vehicle-thumb" id="vehicleThumb">
+          <span class="no-img">No image</span>
+        </div>
+        <div class="meta-list">
+          <div class="meta-item"><span>Identifier</span><b id="meta-id">—</b></div>
+          <div class="meta-item"><span>Country</span><b id="meta-country">—</b></div>
+          <div class="meta-item"><span>Type</span><b id="meta-type">—</b></div>
+          <div class="meta-item"><span>BR (AB/RB/SB)</span><b id="meta-br">—</b></div>
+          <div class="meta-item"><span>Mass</span><b id="meta-mass">—</b></div>
+          <div class="meta-item"><span>Mods</span><b id="meta-mods">—</b></div>
+        </div>
+      </aside>
+
+      <section class="diff-panel">
+        <div class="diff-toolbar">
+          <span class="diff-title" id="diffTitle">Differences</span>
+          <label class="toggle-label">
+            <input type="checkbox" id="detectMove" checked /> Detect moves
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="hideUnchanged" /> Hide unchanged
+          </label>
+          <button class="btn-ghost" id="btnDownload">↓ Download delta</button>
+        </div>
+        <div class="diff-body">
+          <div class="diff-empty" id="comparison">Select a vehicle and two versions to compare.</div>
+        </div>
+      </section>
+
+    </div>
+
   </main>
 
   <script src="js/differences.js"></script>
