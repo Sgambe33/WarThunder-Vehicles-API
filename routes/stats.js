@@ -4,7 +4,8 @@ const { Vehicle, VehicleOld } = require('../models/models');
 const { Op } = require('sequelize');
 const fs = require('node:fs/promises');
 const path = require('node:path');
-const STATS_ATTRIBUTES = ['identifier', 'version', 'is_premium', 'is_pack', 'on_marketplace', 'country', 'vehicle_type', 'value', 'req_exp', 'ge_cost'];
+const CACHE_ENABLED = true;
+const STATS_ATTRIBUTES = ['identifier', 'version', 'is_premium', 'is_pack', 'squadron_vehicle', 'on_marketplace', 'country', 'vehicle_type', 'value', 'req_exp', 'ge_cost'];
 const STATS_CACHE_DIR = path.resolve(__dirname, '../cache/stats');
 
 const toCacheFilePath = (cacheKey) => {
@@ -57,6 +58,14 @@ async function writeStatsCache(cacheKey, payload) {
     await fs.writeFile(filePath, JSON.stringify(payload), 'utf8');
 }
 
+const getVehicleCategory = (v) => {
+    if (v.squadron_vehicle) return 'squadron';
+    if (v.is_pack) return 'pack';
+    if (v.on_marketplace && v.is_premium) return 'marketplace_premium';
+    if (v.on_marketplace) return 'marketplace';
+    if (v.is_premium) return 'premium';
+    return 'techtree';
+};
 
 module.exports = {
     base_route: '/vehicles/stats',
@@ -70,7 +79,7 @@ module.exports = {
                 const cacheKey = requestedVersion || 'latest';
                 const cachedStats = await getCachedStats(cacheKey);
 
-                if (cachedStats) {
+                if (cachedStats && CACHE_ENABLED) {
                     return res.status(200).json(cachedStats);
                 }
 
@@ -91,10 +100,8 @@ module.exports = {
                     ...oldVersions.map(v => v.version)
                 ])].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-
                 let vehicleList = [];
                 if (requestedVersion) {
-                    //version <= targetVersion
                     const versionWhere = {
                         ...commonWhere,
                         version: { [Op.lte]: requestedVersion }
@@ -124,7 +131,6 @@ module.exports = {
 
                     vehicleList = vehicleMap.values();
                 } else {
-                    //otherwise get stats for latest version
                     vehicleList = await Vehicle.findAll({
                         where: commonWhere,
                         attributes: STATS_ATTRIBUTES,
@@ -135,17 +141,20 @@ module.exports = {
                 const stats = {
                     total_techtree_vehicles: 0,
                     total_premium_vehicles: 0,
+                    total_pack_vehicles: 0,
+                    total_marketplace_vehicles: 0,
+                    total_marketplace_premium_vehicles: 0,
+                    total_squadron_vehicles: 0,
                     total_sl_required: 0,
                     total_rp_required: 0,
                     total_ge_required: 0,
+                    total_srp_required: 0,
                     categories: {},
                     countries: {}
                 };
 
                 for (const v of vehicleList) {
-                    const isPremium = v.is_premium;
-                    const isPack = v.is_pack;
-                    const onMarket = v.on_marketplace;
+                    const category = getVehicleCategory(v);
                     const country = v.country;
                     const type = v.vehicle_type;
 
@@ -173,35 +182,42 @@ module.exports = {
 
                     cStat.total_vehicles++;
                     typeStat.count++;
-
                     stats.categories[type] = (stats.categories[type] || 0) + 1;
 
-                    //non-premium / non-market / non-pack => tech tree vehicles
-                    if (!isPremium && !onMarket && !isPack) {
-                        const val = parseInt(v.value) || 0;
-                        const exp = parseInt(v.req_exp) || 0;
-
-                        stats.total_techtree_vehicles++;
-                        cStat.total_value += val;
-                        cStat.total_req_exp += exp;
-
-                        typeStat.total_value += val;
-                        typeStat.total_req_exp += exp;
-
-                        stats.total_sl_required += val;
-                        stats.total_rp_required += exp;
-                    }
-
-                    // premium only (market and packs not considered)
-                    if (isPremium) {
-                        stats.total_premium_vehicles++;
-
-                        if (!isPack && !onMarket) {
+                    switch (category) {
+                        case 'techtree': {
+                            const val = parseInt(v.value) || 0;
+                            const exp = parseInt(v.req_exp) || 0;
+                            stats.total_techtree_vehicles++;
+                            stats.total_sl_required += val;
+                            stats.total_rp_required += exp;
+                            cStat.total_value += val;
+                            cStat.total_req_exp += exp;
+                            typeStat.total_value += val;
+                            typeStat.total_req_exp += exp;
+                            break;
+                        }
+                        case 'premium': {
                             const ge = parseInt(v.ge_cost) || 0;
+                            stats.total_premium_vehicles++;
+                            stats.total_ge_required += ge;
                             cStat.total_ge_cost += ge;
                             typeStat.total_ge_cost += ge;
-                            stats.total_ge_required += ge;
+                            break;
                         }
+                        case 'pack':
+                            stats.total_pack_vehicles++;
+                            break;
+                        case 'marketplace':
+                            stats.total_marketplace_vehicles++;
+                            break;
+                        case 'marketplace_premium':
+                            stats.total_marketplace_premium_vehicles++;
+                            break;
+                        case 'squadron':
+                            stats.total_squadron_vehicles++;
+                            stats.total_srp_required += v.req_exp
+                            break;
                     }
                 }
 
