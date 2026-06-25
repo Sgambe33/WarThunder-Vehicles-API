@@ -1,7 +1,7 @@
 const UNIT_TYPES = {
     'tanks': ["tank", "light_tank", "medium_tank", "heavy_tank", "tank_destroyer", "spaa", "lbv", "mbv", "hbv", "exoskeleton"],
-    'aircrafts': ["attack_helicopter", "utility_helicopter","fighter", "assault", "bomber"],
-    'ships': ["ship", "destroyer", "light_cruiser", "boat", "heavy_boat", "barge", "frigate","heavy_cruiser", "battlecruiser", "battleship", "submarine"]
+    'aircrafts': ["attack_helicopter", "utility_helicopter", "fighter", "assault", "bomber"],
+    'ships': ["ship", "destroyer", "light_cruiser", "boat", "heavy_boat", "barge", "frigate", "heavy_cruiser", "battlecruiser", "battleship", "submarine"]
 }
 
 const VERSION_REGEX = /^\d+\.\d+\.\d+\.\d+$/;
@@ -78,7 +78,13 @@ const EVENT_VEHICLES = [
     "nt_su_24m",
     "nt_su_25t",
     "nt_tu_95m",
-    "tu_95m"
+    "tu_95m",
+    "cn_mbt2000_sm",
+    "germ_leopard_2a4m_can_sm",
+    "jp_type_90b_sm",
+    "uk_challenger_2_megatron_sm",
+    "us_m1a1_hc_usmc_sm",
+    "ussr_t_80ue1_sm"
 ]
 
 module.exports = {
