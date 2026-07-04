@@ -94,8 +94,21 @@ const EVENT_VEHICLES = [
     "ussr_t_80ue1_sm"
 ]
 
+const BLOCKED_USER_AGENTS = [
+    // AI / LLM crawlers
+    'gptbot', 'oai-searchbot', 'chatgpt-user', 'ccbot', 'claudebot', 'claude-web',
+    'anthropic-ai', 'perplexitybot', 'perplexity-user', 'bytespider', 'amazonbot',
+    'google-extended', 'googleother', 'applebot-extended', 'meta-externalagent',
+    'facebookbot', 'diffbot', 'imagesiftbot', 'omgili', 'timpibot', 'youbot',
+    'cohere-ai', 'ai2bot',
+    // SEO / marketing / content scrapers
+    'ahrefsbot', 'semrushbot', 'mj12bot', 'dotbot', 'dataforseobot', 'petalbot',
+    'blexbot', 'megaindex', 'seznambot', 'serpstatbot', 'zoominfobot'
+];
+
 module.exports = {
     UNIT_TYPES,
     VERSION_REGEX,
-    EVENT_VEHICLES
+    EVENT_VEHICLES,
+    BLOCKED_USER_AGENTS
 }
