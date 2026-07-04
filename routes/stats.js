@@ -216,7 +216,7 @@ module.exports = {
                             break;
                         case 'squadron':
                             stats.total_squadron_vehicles++;
-                            stats.total_srp_required += v.req_exp
+                            stats.total_srp_required += parseInt(v.req_exp) || 0;
                             break;
                     }
                 }

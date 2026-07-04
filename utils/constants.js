@@ -26,12 +26,14 @@ const EVENT_VEHICLES = [
     "ussr_t_80u_yt_cup_2019",
     "uk_challenger_ii_yt_cup_2019",
     "germ_leopard_2a5_yt_cup_2019",
+    //Test vehicles
     "j_8f_missile_test",
     "mirage_2000_5f_missile_test",
     "saab_jas39c_south_africa_missile_test",
     "mig_29smt_9_19_missile_test",
     "f_16d_block_40_barak_2_missile_test",
     "f_16c_block_50_missile_test",
+    //Mad thunder
     "md_ystervark_spaa_uparmor_flamer",
     "md_ystervark_spaa_uparmor",
     "md_ystervark_spaa_flamer",
@@ -56,18 +58,22 @@ const EVENT_VEHICLES = [
     "md_m53_59_uparmor_rocket",
     "md_tgdgb_m40_lv",
     "md_tgdgb_m40_lv_uparmor",
+    //Tutorials
     "uk_crusader_aa_mk_2_tutorial",
     "ussr_t_50_for_tutorial",
     "us_m26_pershing_tutorial",
     "germ_panther_ii_tutorial",
     "us_m4a2_76w_sherman_tutorial",
+    //Atomic Age stuff?
     "atomic_pchela_usa",
     "atomic_pchela_lazer_usa",
     "us_atomic_hedgie",
     "atomic_pchela_ussr",
     "atomic_pchela_lazer_ussr",
     "ussr_atomic_hedgie",
+    //Winter event
     "us_m8_scott_snowball",
+    //Nuclear thunder
     "nt_a_10a_early",
     "nt_b_52h",
     "b_52h",
@@ -79,6 +85,7 @@ const EVENT_VEHICLES = [
     "nt_su_25t",
     "nt_tu_95m",
     "tu_95m",
+    //Senrai Maidens
     "cn_mbt2000_sm",
     "germ_leopard_2a4m_can_sm",
     "jp_type_90b_sm",

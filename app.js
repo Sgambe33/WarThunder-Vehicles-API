@@ -68,7 +68,7 @@ app.use((err, req, res, next) => {
 
 const PORT = 3000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server Started at http://localhost:${PORT}`);
 });
 

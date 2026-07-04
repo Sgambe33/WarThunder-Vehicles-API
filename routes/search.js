@@ -15,7 +15,7 @@ module.exports = {
                     raw: true,
                     where: {
                         identifier: {
-                            [Op.like]: `%${name.replace('-', '_')}%`,
+                            [Op.like]: `%${name.replace(/-/g, '_')}%`,
                         },
                     },
                 });
