@@ -8,7 +8,7 @@
     "start": "node app.js"
   },
   "author": "Sgambe33",
-  "license": "",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "nodemon": "^3.1.11"
   },
