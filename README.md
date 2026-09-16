@@ -32,6 +32,11 @@ Additional webpages with small tools can be found at the following links:
 - Extended economy data
 - Engine parameters
 - Thermal and night vision data
+- Radars, RWR, IRST, MAW, and LWS sensor data
+- Gun depression, elevation, traverse speeds, and stabilization
+- Naval fire control directors, displacement, and armor (citadel/turrets)
+- Laser/optical rangefinders & engine smoke (ESS)
+- Operator countries and national research bonuses
 - Vehicles versions across multiple updates
 - Modifications
 - Tech tree prerequisites

@@ -23,7 +23,7 @@ paths:
         description: Maximum number of vehicles to return
         schema:
           type: integer
-          minimum: 0
+          minimum: 1
           maximum: 200
           default: 200
       - name: page
@@ -87,7 +87,7 @@ paths:
         schema:
           type: integer
           minimum: 1
-          maximum: 8
+          maximum: 9
       - name: isPremium
         in: query
         description: Filter by premium status
@@ -152,7 +152,7 @@ paths:
         required: false
         schema:
           type: string
-          example: 2.53.0.7
+          example: 2.59.0.7
 
       responses:
         "200":
@@ -162,7 +162,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/VehicleSpecific"
         "400":
-          description: The provided version query parameter is malformed (expected format like 2.53.0.7)
+          description: The provided version query parameter is malformed (expected format like 2.59.0.7)
           content:
             application/json:
               schema:
@@ -191,10 +191,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/VehiclesIDs"
-                maxItems: 200
+                $ref: "#/components/schemas/VehiclesIDs"
         "404":
           description: No vehicles matching name found
   "/vehicles/stats":
@@ -208,7 +205,7 @@ paths:
         required: false
         schema:
           type: string
-          example: 2.53.0.7
+          example: 2.59.0.7
       responses:
         '200':
           description: Successful response with vehicle statistics
@@ -309,6 +306,8 @@ components:
           type: string
         country:
           type: string
+        operator_country:
+          type: string
         vehicle_type:
           type: string
         vehicle_sub_types:
@@ -322,6 +321,9 @@ components:
         release_date:
           type: string
           format: nullable
+        version:
+          type: string
+          example: 2.59.0.7
         era:
           type: integer
           format: int32
@@ -335,6 +337,9 @@ components:
           type: number
         simulator_ground_br:
           type: number
+        value:
+          type: integer
+          format: int32
         req_exp:
           type: integer
           format: int32
@@ -345,6 +350,8 @@ components:
         on_marketplace:
           type: boolean
         squadron_vehicle:
+          type: boolean
+        has_nation_bonus:
           type: boolean
         ge_cost:
           type: integer
@@ -782,6 +789,79 @@ components:
                               explosive_mass:
                                 type: number
                                 format: nullable
+        gun_depression:
+          type: number
+          nullable: true
+          description: Maximum main gun depression in degrees (negative value)
+        gun_elevation:
+          type: number
+          nullable: true
+          description: Maximum main gun elevation in degrees
+        turret_traverse_speed:
+          type: number
+          nullable: true
+          description: Turret traverse speed in degrees per second
+        gun_elevation_speed:
+          type: number
+          nullable: true
+          description: Main gun elevation speed in degrees per second
+        gun_stabilizer:
+          $ref: "#/components/schemas/GunStabilizer"
+        main_gun_ammo_capacity:
+          type: integer
+          format: int32
+          description: Total ammunition capacity for the main gun
+        rangefinder_type:
+          type: string
+          nullable: true
+          description: Type of rangefinder (e.g. laser, optical)
+        has_ess:
+          type: boolean
+          description: Whether the vehicle has an Engine Smoke Generating System (ESS)
+        displacement:
+          type: number
+          nullable: true
+          description: Naval vessel displacement in kg
+        citadel_armor:
+          type: array
+          minItems: 0
+          maxItems: 3
+          items:
+            type: number
+          description: Naval citadel armor thickness in mm [front, sides, back]
+        main_turret_armor:
+          type: array
+          minItems: 0
+          maxItems: 3
+          items:
+            type: number
+          description: Naval main turret armor thickness in mm [front, sides, back]
+        minimum_crew_alive_count:
+          type: integer
+          format: int32
+          description: Minimum surviving crew count required before ship is considered destroyed
+        fire_director:
+          $ref: "#/components/schemas/FireDirector"
+        radars:
+          type: array
+          items:
+            $ref: "#/components/schemas/Radar"
+          description: Radar systems installed on the vehicle
+        rwr:
+          $ref: "#/components/schemas/Rwr"
+        irst:
+          $ref: "#/components/schemas/Irst"
+        has_maw:
+          type: boolean
+          description: Whether vehicle is equipped with Missile Approach Warning (MAW) system
+        has_lws:
+          type: boolean
+          description: Whether vehicle is equipped with Laser Warning System (LWS)
+        versions:
+          type: array
+          description: All historical and current game versions recorded for this vehicle, sorted ascending
+          items:
+            type: string
         images:
           type: object
           properties:
@@ -789,6 +869,77 @@ components:
               type: string
             techtree:
               type: string
+    GunStabilizer:
+      type: object
+      nullable: true
+      description: Main armament stabilization parameters
+      properties:
+        has_vertical:
+          type: boolean
+          description: Whether vertical gun stabilization is present
+        has_horizontal:
+          type: boolean
+          description: Whether horizontal gun stabilization is present
+        max_speed_kph:
+          type: number
+          description: Maximum vehicle speed in km/h at which the stabilizer remains operational
+    FireDirector:
+      type: object
+      nullable: true
+      description: Naval fire direction and gun computer parameters
+      properties:
+        measure_accuracy:
+          type: number
+          nullable: true
+        target_lock_time:
+          type: number
+          nullable: true
+        calc_time:
+          type: number
+          nullable: true
+        rotation_speed:
+          type: number
+          nullable: true
+    Radar:
+      type: object
+      description: Radar installation details
+      properties:
+        name:
+          type: string
+        scan_patterns:
+          type: array
+          items:
+            type: string
+        signals:
+          type: array
+          items:
+            type: string
+    Rwr:
+      type: object
+      nullable: true
+      description: Radar Warning Receiver (RWR) suite
+      properties:
+        name:
+          type: string
+        bands:
+          type: array
+          items:
+            type: string
+        detect_launch:
+          type: boolean
+        detect_tracking:
+          type: boolean
+        threat_groups:
+          type: array
+          items:
+            type: string
+    Irst:
+      type: object
+      nullable: true
+      description: Infra-Red Search and Track (IRST) sensor
+      properties:
+        name:
+          type: string
     VehiclesIDs:
       type: array
       items:

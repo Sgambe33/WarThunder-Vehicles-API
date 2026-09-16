@@ -13,7 +13,14 @@ const VEHICLE_JSON_FIELDS = [
     'aerodynamics',
     'weapons',
     'presets',
-    'customizable_presets'
+    'customizable_presets',
+    'gun_stabilizer',
+    'citadel_armor',
+    'main_turret_armor',
+    'fire_director',
+    'radars',
+    'rwr',
+    'irst'
 ];
 
 let latestVersionCache = {

@@ -6,6 +6,9 @@ const commonAttributes = {
         type: DataTypes.TEXT, allowNull: false, primaryKey: true
     },
     country: DataTypes.TEXT,
+    operator_country: {
+        type: DataTypes.TEXT, allowNull: true
+    },
     vehicle_type: DataTypes.TEXT,
     vehicle_sub_types: {
         type: DataTypes.JSON, allowNull: true
@@ -29,6 +32,7 @@ const commonAttributes = {
     is_pack: DataTypes.BOOLEAN,
     on_marketplace: DataTypes.BOOLEAN,
     squadron_vehicle: DataTypes.BOOLEAN,
+    has_nation_bonus: DataTypes.BOOLEAN,
     ge_cost: DataTypes.INTEGER,
     crew_total_count: DataTypes.INTEGER,
     visibility: DataTypes.INTEGER,
@@ -134,6 +138,60 @@ const commonAttributes = {
     },
     customizable_presets: {
         type: DataTypes.JSON, allowNull: true
+    },
+    gun_depression: {
+        type: DataTypes.FLOAT, allowNull: true
+    },
+    gun_elevation: {
+        type: DataTypes.FLOAT, allowNull: true
+    },
+    turret_traverse_speed: {
+        type: DataTypes.FLOAT, allowNull: true
+    },
+    gun_elevation_speed: {
+        type: DataTypes.FLOAT, allowNull: true
+    },
+    gun_stabilizer: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    main_gun_ammo_capacity: {
+        type: DataTypes.INTEGER, allowNull: false, defaultValue: 0
+    },
+    rangefinder_type: {
+        type: DataTypes.TEXT, allowNull: true
+    },
+    has_ess: {
+        type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false
+    },
+    displacement: {
+        type: DataTypes.FLOAT, allowNull: true
+    },
+    citadel_armor: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    main_turret_armor: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    minimum_crew_alive_count: {
+        type: DataTypes.INTEGER, allowNull: false, defaultValue: 0
+    },
+    fire_director: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    radars: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    rwr: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    irst: {
+        type: DataTypes.JSON, allowNull: true
+    },
+    has_maw: {
+        type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false
+    },
+    has_lws: {
+        type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false
     }
 }
 const Vehicle = db.sequelize.define('Vehicle', {
